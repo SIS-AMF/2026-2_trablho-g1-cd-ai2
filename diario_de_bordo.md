@@ -14,3 +14,10 @@ Tive uma ideia, estava buscando informações sobre vendas para utilizar no futu
 **2026-09-14**
 
 Realizei a busca do dataset via [SQL](./get_dataset.sql) e iniciei revisão do conteúdo de Ciencia de Dados fazendo testando alguns comandos
+
+
+**2026-09-21**
+
+Não realizei anotações mas durante a semana tirei 1h para analisar e apresnder um pouco sobre as bibliotecas pandas, sklearn, numpy, seaborn, etc.
+Hoje me deparo como um dia antes do trabalho e preciso otimizar o tempo para conseguir atigir um bom resultado com auxilio da IA.
+Fiz um monte de testes nesses ultimos dias e percebi que tenho muitas informações para tratar nesse dataset mas bora lá.
