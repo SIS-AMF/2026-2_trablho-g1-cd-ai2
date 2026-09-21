@@ -131,3 +131,16 @@ A Seção 8 do notebook [`eda_v2.ipynb`](./eda_v2.ipynb) foi completamente refat
   - Criação de script Bash executável com formatação ANSI colorida e narrativa de negócio estruturada em 8 cenários.
   - Cobre exaustivamente a ativação dos 5 clusters identificados ($C_0$ a $C_4$), a consulta de catálogo e a demonstração ao vivo dos guardrails (bloqueio de omissão, detecção de typos via `difflib` e rejeição de formas de pagamento não homologadas).
   - Suporta modo interativo (com pausas entre casos para explicação oral) e modo contínuo (`./demo.sh --auto`). Validação executada com 100% de sucesso.
+
+*Reestruturação Metodológica: Análise Preliminar de Cargas Fatoriais e Semântica Antes dos Plots 2D e 3D (Seções 8.4 e 8.5 de `eda_v2.ipynb`):*
+- **Fluxo Conceitual Padronizado:** Adoção rigorosa do padrão *Fundamentação Estatística (Tabela de Cargas) $\rightarrow$ Gráfico Diagnóstico de Barras $\rightarrow$ Síntese Semântica de Negócio $\rightarrow$ Auditoria Empírica $\rightarrow$ Projeção Visual (Dispersão)* antes de qualquer scatter plot multidimensional.
+- **Projeção 2D (Seção 8.4):**
+  - Cargas e contribuições de $PC_1$ e $PC_2$ apresentadas na Tabela 8.4.1 e Gráfico de Barras Divergentes [`reports/figures/02b_pca_loadings_barplots.png`](./reports/figures/02b_pca_loadings_barplots.png).
+  - **Eliminação de Redundâncias (8.4.2):** Substituição da repetição de números da tabela por uma **Síntese Operacional de Negócio** orientada a decisões do balcão (Eixo X = porte da compra: avulso vs atacado; Eixo Y = rotina da feira: café da manhã vs rush da tarde/noite).
+  - Validação no PDV via Casos Extremos (8.4.3) antes do scatter plot com biplot de cargas (8.4.4).
+- **Projeção 3D (Seção 8.5) com Simetria Eixo por Eixo ($X, Y, Z$):**
+  - Incorporação formal dos 3 eixos simultaneamente elevando a variância explicada acumulada para 54,2%.
+  - Tabela comparativa (8.5.1) e **Painel Diagnóstico Triplo de Cargas Fatoriais** em alta resolução: [`reports/figures/03b_pca_loadings_3d_triplo.png`](./reports/figures/03b_pca_loadings_3d_triplo.png), confrontando $PC_1$, $PC_2$ e $PC_3$ lado a lado.
+  - **Análise Tridimensional Eixo por Eixo (8.5.2):** Mapeamento do hipercubo sob 3 coordenadas independentes ($X$ = Volume da Cesta; $Y$ = Momento Temporal; $Z$ = Sensibilidade de Preço Unitário do SKU).
+  - **Auditoria Empírica de Casos Extremos no Eixo Z (8.5.3):** Prova cabal no balcão de que o topo de $Z$ isola Cucas Nobres (R$ 25,00) e a base agrupa Doces Populares de desembolso unitário baixo (Alfajores e Rapaduras a R$ 5,00 a R$ 6,00).
+  - Dispersão tridimensional com centróides e rótulos semânticos nos eixos (`Axes3D` em 8.5.4).
