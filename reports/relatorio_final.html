@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Relatório Técnico: Agrupamento de Pedidos e Recomendação no Checkout (KAlimentos)</title>
+<style>
+@page {
+  size: A4 portrait;
+  margin: 18mm 15mm 18mm 15mm;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 9.5pt;
+  line-height: 1.55;
+  color: #1e293b;
+  background: #ffffff;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  font-size: 16pt;
+  font-weight: 700;
+  color: #0f172a;
+  border-bottom: 2.5px solid #1e3a8a;
+  padding-bottom: 8px;
+  margin-top: 0;
+  margin-bottom: 12px;
+  line-height: 1.25;
+}
+
+h2 {
+  font-size: 12pt;
+  font-weight: 700;
+  color: #1e3a8a;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 3px;
+  margin-top: 18px;
+  margin-bottom: 8px;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+h3 {
+  font-size: 10.5pt;
+  font-weight: 600;
+  color: #334155;
+  margin-top: 12px;
+  margin-bottom: 5px;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+h4 {
+  font-size: 9.5pt;
+  font-weight: 600;
+  color: #475569;
+  margin-top: 10px;
+  margin-bottom: 4px;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 8px;
+  text-align: justify;
+}
+
+ul, ol {
+  margin-top: 0;
+  margin-bottom: 8px;
+  padding-left: 20px;
+}
+
+li {
+  margin-bottom: 4px;
+}
+
+strong {
+  color: #0f172a;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0 14px 0;
+  font-size: 8pt;
+  line-height: 1.35;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+th, td {
+  border: 1px solid #cbd5e1;
+  padding: 5px 7px;
+  text-align: left;
+}
+
+th {
+  background-color: #1e3a8a;
+  color: #ffffff;
+  font-weight: 600;
+  text-align: center;
+}
+
+tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+img {
+  max-width: 90%;
+  height: auto;
+  display: block;
+  margin: 10px auto;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+pre {
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 7.5pt;
+  line-height: 1.35;
+  overflow-x: auto;
+  margin: 8px 0;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 8pt;
+  background-color: #f1f5f9;
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: #0f172a;
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  font-size: 7.5pt;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 14px 0;
+}
+
+blockquote {
+  border-left: 3.5px solid #2563eb;
+  background-color: #f0f7ff;
+  padding: 6px 12px;
+  margin: 8px 0;
+  border-radius: 0 4px 4px 0;
+  font-style: normal;
+  color: #1e3a8a;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.math-block {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 8px 0 10px 0;
+  text-align: center;
+  font-size: 9.5pt;
+  color: #0f172a;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.page-break {
+  break-before: page;
+  page-break-before: always;
+}
+</style>
+</head>
+<body>
+<h1>Relatório Técnico: Agrupamento de Pedidos e Recomendação no Checkout (KAlimentos)</h1>
+<p><strong>Instituição:</strong> Faculdade Antonio Meneghetti (AMF)<br />
+<strong>Curso:</strong> Bacharelado em Sistemas de Informação<br />
+<strong>Disciplina:</strong> Inteligência Artificial II (2026/02)<br />
+<strong>Docente:</strong> Prof. Rhauani Fazul<br />
+<strong>Discente:</strong> Lucas<br />
+<strong>Repositório Oficial:</strong> <a href="https://github.com/SIS-AMF/2026-2_trablho-g1-cd-ai2">https://github.com/SIS-AMF/2026-2_trablho-g1-cd-ai2</a></p>
+<hr />
+<h2>1. Dataset</h2>
+<h3>1.1 Link de Acesso e Rastreabilidade</h3>
+<p>O dataset do projeto está versionado no repositório GitHub do trabalho (<a href="https://github.com/SIS-AMF/2026-2_trablho-g1-cd-ai2"><code>https://github.com/SIS-AMF/2026-2_trablho-g1-cd-ai2</code></a>), estruturado em dois artefatos centrais:</p>
+<ul>
+<li><strong>Dado Bruto e Imutável:</strong> <a href="../studing/KalimentosFeirasVendas.csv"><code>studing/KalimentosFeirasVendas.csv</code></a>, extraído por meio da consulta SQL relacional de produção <a href="../get_dataset.sql"><code>get_dataset.sql</code></a>.</li>
+<li><strong>Dado Processado e Enriquecido:</strong> <a href="../base.csv"><code>base.csv</code></a>, gerado pelo pipeline de engenharia e saneamento de dados com 16 colunas finais íntegras.</li>
+</ul>
+<h3>1.2 Descrição, Origem e Granularidade</h3>
+<p>Os dados foram extraídos diretamente do banco de dados relacional (PostgreSQL) do sistema de Ponto de Venda (PDV) da empresa de confeitaria e panificação colonial <strong>KAlimentos</strong>. Os registros cobrem as vendas efetuadas em estandes de 12 feiras agropecuárias e gastronômicas regionais no Estado do Rio Grande do Sul (destacando-se <em>Expointer</em>, <em>Expo Afubra</em>, <em>ExpoDireto</em>, <em>Wolksfest Agudo</em> e <em>EXPOBENTO</em>) ao longo do período de março a setembro de 2026.</p>
+<ul>
+<li><strong>Granularidade:</strong> Transações no <strong>nível de item do pedido</strong> (<code>itens_pedido</code> vinculados ao <code>pedido_id</code> e a eventos financeiros).</li>
+<li><strong>Volume:</strong> O dataset bruto contém <strong>3.115 registros</strong>, que após auditoria e descarte de 2 registros fantasmas de quantidade zerada resultantes de cancelamento em caixa, totalizou <strong>3.113 transações de itens comercializados</strong>, abrangendo <strong>2.457 pedidos únicos</strong> (100% dos pedidos preservados).</li>
+<li><strong>Padronização Temporal:</strong> Todos os registros temporais foram normalizados para o fuso horário local oficial <code>America/Sao_Paulo</code>.</li>
+</ul>
+<h3>1.3 Justificativa de Adequação ao Problema</h3>
+<p>As transações de feiras agropecuárias são realizadas no balcão presencial sem qualquer identificador ou cadastro individual do cliente (vendas anônimas). O dataset registra com precisão os produtos comercializados, quantidades, preços unitários, descontos, subtotal, meio de pagamento e carimbo de data/hora. Essa estrutura reflete integralmente o contexto operacional real do PDV, sendo estritamente adequada para a formulação de modelos não supervisionados de agrupamento de pedidos para identificar comportamentos de consumo da cesta e janelas temporais de venda.</p>
+<hr />
+<h2>2. Problema e objetivo</h2>
+<h3>2.1 Situação Analisada</h3>
+<p>A KAlimentos opera sob regime de alta rotatividade de público em feiras itinerantes. O atendimento de balcão é dinâmico, sem cadastro prévio de clientes e com equipe de atendimento focada na agilidade operacional. Nesse cenário, inexiste histórico individual de recompra ou perfil demográfico, demandando que qualquer estratégia de inteligência seja baseada exclusivamente nas características observáveis do próprio pedido em andamento (horário, turno, itens na cesta e valores envolvidos).</p>
+<h3>2.2 Objetivo do Projeto</h3>
+<p>O objetivo central consiste em <strong>classificar e agrupar pedidos</strong> transacionados no PDV a partir de suas características contextuais (momento do dia), composição da cesta (volume, quantidade de itens, diversidade) e magnitude monetária (preço unitário e valor total do pedido), identificando tipologias homogêneas de consumo.</p>
+<h3>2.3 Aplicação Prática Futura</h3>
+<p>Como hipótese de uso prático futuro, os agrupamentos obtidos subsidiarão um <strong>motor de recomendação de produtos no checkout</strong> caso a operação de vendas venha a migrar para um canal de <strong>e-commerce</strong>. Ao submeter um carrinho em tempo real no fechamento da compra, o sistema infere o cluster correspondente ao pedido e dispara gatilhos de <em>cross-selling</em> com produtos complementares e descontos progressivos específicos daquele perfil.</p>
+<h3>2.4 Tipo de Tarefa de Machine Learning</h3>
+<p>A tarefa enquadra-se estritamente como <strong>Aprendizado Não Supervisionado</strong> (<em>Unsupervised Learning</em>), focada em <strong>Agrupamento / Clusterização</strong> (<em>Clustering</em>), sem variáveis-alvo pré-rotuladas.</p>
+<hr />
+<h2>3. Exploração e preparação dos dados</h2>
+<h3>3.1 Auditoria de Qualidade e Integridade Financeira</h3>
+<p>A exploração inicial dos dados brutos validou a invariante contábil mandatória de fechamento de caixa:</p>
+<div class="math-block"><i>pedido_subtotal</i> &minus; <i>pedido_valor_desconto</i> &equiv; <b>valor_final_pedido</b></div>
+Em 100% dos registros analisados, a igualdade financeira manteve-se exata com tolerância zero (&Delta; = 0,00, isto é, R$ 0,00 de resíduo), permitindo o descarte seguro do atributo redundante `pedido_tipo_desconto`.
+<h3>3.2 Descarte de Atributos Irrelevantes e Inconsistentes</h3>
+<p>Foram eliminadas colunas operacionais que não agregam valor preditivo ou que apresentavam ruído cadastral:</p>
+<ul>
+<li><code>evento_data_inicio</code> e <code>evento_data_fim</code>: Metadados administrativos do calendário das feiras que não influenciam a cesta imediata.</li>
+<li><code>item_pedido_user_id</code> e <code>pedido_vendedor</code>: Nos estandes de feira, múltiplos operadores de caixa utilizam rotativamente o mesmo terminal sob login compartilhado, tornando o identificador de usuário espúrio e não correlacionado ao cliente final.</li>
+</ul>
+<h3>3.3 Tratamento de Nulos, Duplicidades e Cancelamentos no PDV</h3>
+<ul>
+<li><strong>Valores Ausentes:</strong> Zero valores nulos remanescentes nas colunas utilizadas para modelagem.</li>
+<li><strong>Saneamento de Registros Espúrios (<i>Q</i> ≤ 0):</strong> Identificaram-se 2 registros fantasmas com quantidade zerada (<code>quantidade_item == 0</code>) decorrentes de cancelamentos operacionais no PDV (um item de alfajor na <em>Expo Afubra</em> e uma rapadura na <em>EXPOBENTO</em>). Em ambos os pedidos, a remoção do registro zerado manteve intacto o subtotal contábil de R$ 20,00 e corrigiu o indicador de diversidade da cesta (<code>qnt_repeticoes</code> de 2 para 1), preservando a totalidade dos 2.457 pedidos únicos e consolidando a base em 3.113 itens válidos.</li>
+</ul>
+<h3>3.4 Data Quality: Discrepâncias de Escala e Correção Proporcional</h3>
+<p>Na conferência da relação ∑ (quantidade × preço_unitário) == pedido_subtotal:</p>
+<ul>
+<li><strong>94,34% (2.318 pedidos):</strong> Fechamento aritmético perfeito com dados originais.</li>
+<li><strong>5,66% (139 pedidos):</strong> Discrepâncias decorrentes do lançamento manual de preços de caixas fechadas (<em>Caixa x16</em>, <em>Pacote x6</em>, etc.) atrelados a quantidades unitárias avulsas.</li>
+</ul>
+<p>Para sanar o problema sem recorrer a constantes ou números mágicos arbitrários, implementou-se um mecanismo estatístico por proporção de escala (<i>k</i>) ancorado na mediana do SKU:</p>
+<ul>
+<li>Derivaram-se colunas auditáveis: <code>quantidade_ajustada</code>, <code>preco_unitario_ajustado</code> e <code>tipo_escala</code>.</li>
+<li><strong>Harmonização de Fardos:</strong> 11 pedidos onde foram adquiridos fardos fechados unitários (ex.: 1 pacote de alfajor x4 a R$ 20,00) foram convertidos para unidades físicas de consumo (<i>Q</i><sub>final</sub> = <i>Q</i> × <i>k</i> e <i>P</i><sub>final</sub> = <i>P</i> / <i>k</i>), eliminando a dispersão artificial de preços.</li>
+<li><strong>Portão de Qualidade Contábil (Subseção 4.6.6 do Pipeline):</strong> Auditoria global em 100% dos 2.457 pedidos atestando conformidade financeira absoluta: ∑ (quantidade_final × preco_unitario_final) == pedido_subtotal com maior resíduo absoluto de <strong>R$ 0,000000</strong>.</li>
+</ul>
+<h3>3.5 Engenharia e Criação de Atributos</h3>
+<p>Foram geradas variáveis analíticas a partir do carimbo temporal e da estrutura dos pedidos:</p>
+<ul>
+<li><code>dia_horario</code>: Hora inteira da venda (0 a 23).</li>
+<li><code>dia_semana</code>: Dia da semana (0=Segunda a 6=Domingo).</li>
+<li><code>mes</code>: Mês da realização da feira (3 a 9).</li>
+<li><code>turno</code>: Segmentação temporal em <em>Madrugada</em> (0h–5h), <em>Manhã</em> (6h–11h), <em>Tarde</em> (12h–17h) e <em>Noite</em> (18h–23h).</li>
+<li><code>qnt_repeticoes</code>: Contagem de linhas associadas ao mesmo <code>pedido_id</code>, mensurando a diversidade da cesta de compras.</li>
+</ul>
+<h3>3.6 Normalização Semântica de Produtos</h3>
+<p>Variações de cadastro textual de um mesmo produto foram unificadas em famílias semânticas padronizadas:</p>
+<ul>
+<li><code>ALFAJOR_PRETO</code>, <code>ALFAJOR_BRANCO</code>, <code>ALFAJOR_(CAIXA_X16)</code> → <code>ALFAJOR</code></li>
+<li><code>CUCA_ENROLADA_DE_AMENDOIM</code>, <code>CUCA_ENROLADA_DE_CHOCOLATE</code> → <code>CUCA_ENROLADA</code></li>
+<li><code>RAPADURA_DE_MELADO</code>, <code>RAPADURA_DE_MELADO_GRÃO_MOÍDO</code> → <code>RAPADURA_MELADO</code></li>
+<li><code>RAPADURA_ASSADA</code>, <code>RAPADURA_ASSADA_(PACOTE_X6)</code> → <code>RAPADURA_ASSADA</code></li>
+<li><code>BOLACHA_DE_MANTEIGA</code>, <code>BOLACHA_DE_MILHO</code> → <code>BOLACHA</code></li>
+<li><code>AMENDOIM_SALGADO_E_TEMPERADO</code> → <code>AMENDOIM_TEMPERADO</code></li>
+</ul>
+<h3>3.7 Codificação e Escalonamento</h3>
+<ul>
+<li><strong>Codificação Categórica:</strong> Emprego de <code>LabelEncoder</code> independente para <code>nome_produto</code> (<code>prod_code</code>), <code>metodo_pagamento</code> (<code>metodo_code</code>) e <code>turno</code> (<code>turno_code</code>).</li>
+<li><strong>Padronização:</strong> As 8 variáveis do espaço vetorial (<code>dia_horario</code>, <code>prod_code</code>, <code>metodo_code</code>, <code>turno_code</code>, <code>preco_unitario_final</code>, <code>quantidade_final</code>, <code>valor_final_pedido</code>, <code>qnt_repeticoes_num</code>) foram submetidas ao <code>StandardScaler</code> (μ = 0, σ = 1), impedindo que magnitudes monetárias ou volumétricas distorcessem o cálculo das distâncias euclidianas.</li>
+</ul>
+<hr />
+<h2>4. Estratégia experimental</h2>
+<h3>4.1 Abordagem de Agrupamento Global</h3>
+<p>Tratando-se de Aprendizado Não Supervisionado para descoberta da estrutura latente e dos padrões naturais de compra da base histórica, o modelo K-Means foi treinado sobre o conjunto total consolidado (<i>N</i> = 3.113 itens em 2.457 pedidos).</p>
+<p>A aplicação de partições clássicas de treino e teste supervisionadas (ex.: 80/20) não é recomendada para este contexto analítico porque o particionamento arbitrário fragmentaria subpopulações raras e legítimas da operação (como o cluster de Atacado e Encomendas Corporativas, que possui 13 transações representativas), prejudicando a definição precisa dos centróides globais.</p>
+<h3>4.2 Protocolo Experimental e Reprodutibilidade</h3>
+<ul>
+<li><strong>Determinismo:</strong> Fixação irrestrita de sementes aleatórias em <code>random_state=42</code> com <code>n_init=10</code>.</li>
+<li><strong>Varredura de Hiperparâmetros:</strong> Execução de varredura paramétrica para <i>K</i> ∈ [2, 8], confrontando simultaneamente quatro indicadores quantitativos de clusterização: Inércia (WCSS / Método do Cotovelo), Coeficiente de Silhueta (<em>Silhouette Score</em>), Índice Calinski-Harabasz e Índice Davies-Bouldin.</li>
+<li><strong>Validação Prática:</strong> Avaliação de estabilidade através de simulação de inferência em tempo real com novos registros de checkout no script de linha de comando.</li>
+</ul>
+<hr />
+<h2>5. Modelagem</h2>
+<h3>5.1 Algoritmo de Agrupamento (K-Means)</h3>
+<p>Adotou-se o algoritmo <strong>K-Means</strong> (<code>sklearn.cluster.KMeans</code>), seguindo os fundamentos apresentados nas diretrizes didáticas da disciplina.</p>
+<ul>
+<li><strong>Hiperparâmetros Selecionados:</strong>
+<ul>
+<li><code>n_clusters=5</code>: Número ótimo de agrupamentos definido pela análise experimental.</li>
+<li><code>random_state=42</code>: Garantia de reprodutibilidade estocástica na inicialização.</li>
+<li><code>n_init=10</code>: Número de inicializações independentes do algoritmo <i>k</i>-means++ para seleção do melhor centróide inicial em termos de inércia mínima.</li>
+</ul>
+</li>
+</ul>
+<h3>5.2 Redução de Dimensionalidade (PCA)</h3>
+<p>Para viabilizar a interpretabilidade geométrica das 8 dimensões padronizadas, utilizou-se a técnica de Análise de Componentes Principais (<strong>PCA</strong>):</p>
+<ul>
+<li><strong>PCA 2D (<code>n_components=2</code>):</strong> Projeção linear no plano cartesiano combinada com o Biplot de Cargas Fatoriais (<em>loadings</em>).</li>
+<li><strong>PCA 3D (<code>n_components=3</code>):</strong> Projeção tridimensional para isolar a sensibilidade a preços unitários e verificar a dispersão espacial dos agrupamentos.</li>
+</ul>
+<h3>5.3 Justificativa das Escolhas</h3>
+<ol>
+<li><strong>Eficiência Operacional:</strong> O K-Means apresenta complexidade temporal <i>O</i>(<i>K</i> · <i>d</i>) por inferência, permitindo predições instantâneas (&lt; 2 ms) no momento do checkout, sem gargalo computacional.</li>
+<li><strong>Interpretabilidade Direta:</strong> As coordenadas dos centróides gerados refletem a média do perfil padronizado, facilitando a parametrização de regras determinísticas de negócio para <em>cross-selling</em>.</li>
+<li><strong>Convergência Estatística:</strong> A escolha de <i>K</i> = 5 coincide simultaneamente com o ponto de inflexão da inércia e com o ápice matemático absoluto do índice Calinski-Harabasz.</li>
+</ol>
+<hr />
+<h2>6. Avaliação</h2>
+<h3>6.1 Diagnóstico de Otimização do Hiperparâmetro K</h3>
+<p>A Tabela 1 apresenta a progressão das 4 métricas calculadas na esteira de otimização de K:</p>
+<p><strong>Tabela 1: Métricas de Validação de Clusterização para <i>K</i> ∈ [2, 8]</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><i>K</i></th>
+<th style="text-align:center">Inércia (WCSS)</th>
+<th style="text-align:center">Silhouette Score</th>
+<th style="text-align:center">Calinski-Harabasz</th>
+<th style="text-align:center">Davies-Bouldin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:center">20.931,12</td>
+<td style="text-align:center">0,2935</td>
+<td style="text-align:center">590,49</td>
+<td style="text-align:center">1,3120</td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td style="text-align:center">18.226,93</td>
+<td style="text-align:center">0,2967</td>
+<td style="text-align:center">569,64</td>
+<td style="text-align:center">1,6175</td>
+</tr>
+<tr>
+<td style="text-align:center">4</td>
+<td style="text-align:center">14.593,46</td>
+<td style="text-align:center">0,2835</td>
+<td style="text-align:center">732,19</td>
+<td style="text-align:center">1,3118</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>5</strong></td>
+<td style="text-align:center"><strong>12.362,00</strong></td>
+<td style="text-align:center"><strong>0,2835</strong></td>
+<td style="text-align:center"><strong>788,31 (Ápice)</strong></td>
+<td style="text-align:center"><strong>1,2293</strong></td>
+</tr>
+<tr>
+<td style="text-align:center">6</td>
+<td style="text-align:center">11.205,22</td>
+<td style="text-align:center">0,2908</td>
+<td style="text-align:center">759,68</td>
+<td style="text-align:center">1,1961</td>
+</tr>
+<tr>
+<td style="text-align:center">7</td>
+<td style="text-align:center">10.332,82</td>
+<td style="text-align:center">0,2813</td>
+<td style="text-align:center">730,00</td>
+<td style="text-align:center">1,1816</td>
+</tr>
+<tr>
+<td style="text-align:center">8</td>
+<td style="text-align:center">9.298,47</td>
+<td style="text-align:center">0,2778</td>
+<td style="text-align:center">744,44</td>
+<td style="text-align:center">1,1079</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Inércia:</strong> Apresenta clara desaceleração na taxa de variação (ponto de cotovelo) entre <i>K</i> = 4 e <i>K</i> = 5.</li>
+<li><strong>Calinski-Harabasz:</strong> Atinge seu ápice global absoluto em <strong><i>K</i> = 5 (788,31)</strong>, comprovando máxima dispersão inter-cluster versus compacidade intra-cluster.</li>
+<li><strong>Davies-Bouldin:</strong> Apresenta queda expressiva em <i>K</i> = 5 (1,2293) em comparação a <i>K</i> = 3 e <i>K</i> = 4.</li>
+<li><strong>Referência Diagnóstica:</strong> Figura <a href="figures/01_otimizacao_k_cotovelo_silhueta.png"><code>reports/figures/01_otimizacao_k_cotovelo_silhueta.png</code></a>.</li>
+</ul>
+<p><img src="figures/01_otimizacao_k_cotovelo_silhueta.png" alt="Otimização do Hiperparâmetro K: Método do Cotovelo e Coeficiente de Silhueta" /></p>
+<h3>6.2 Análise de Cargas Fatoriais e Decomposição PCA</h3>
+<p>Para fundamentar as dimensões latentes projetadas, a Tabela 2 sintetiza as cargas fatoriais (<i>w</i><sub>1</sub>, <i>w</i><sub>2</sub>, <i>w</i><sub>3</sub>) e a contribuição relativa de cada atributo original sobre as três primeiras componentes principais (limiar teórico de dominância uniforme: superior a 12,5%).</p>
+<p><strong>Tabela 2: Matriz de Cargas Fatoriais e Contribuição Relativa do PCA Tridimensional</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Atributo Original</th>
+<th style="text-align:center">Carga PC<sub>1</sub></th>
+<th style="text-align:center">Contrib. PC<sub>1</sub></th>
+<th style="text-align:center">Carga PC<sub>2</sub></th>
+<th style="text-align:center">Contrib. PC<sub>2</sub></th>
+<th style="text-align:center">Carga PC<sub>3</sub></th>
+<th style="text-align:center">Contrib. PC<sub>3</sub></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Hora do Dia</td>
+<td style="text-align:center">+0,0867</td>
+<td style="text-align:center">0,75%</td>
+<td style="text-align:center"><strong>+0,6983</strong></td>
+<td style="text-align:center"><strong>48,77%</strong></td>
+<td style="text-align:center">-0,0576</td>
+<td style="text-align:center">0,33%</td>
+</tr>
+<tr>
+<td style="text-align:left">Código Produto</td>
+<td style="text-align:center">-0,0595</td>
+<td style="text-align:center">0,35%</td>
+<td style="text-align:center">+0,0182</td>
+<td style="text-align:center">0,03%</td>
+<td style="text-align:center"><strong>+0,4216</strong></td>
+<td style="text-align:center"><strong>17,78%</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">Método Pagamento</td>
+<td style="text-align:center">+0,0164</td>
+<td style="text-align:center">0,03%</td>
+<td style="text-align:center">-0,0187</td>
+<td style="text-align:center">0,03%</td>
+<td style="text-align:center">-0,3096</td>
+<td style="text-align:center">9,59%</td>
+</tr>
+<tr>
+<td style="text-align:left">Turno</td>
+<td style="text-align:center">+0,0673</td>
+<td style="text-align:center">0,45%</td>
+<td style="text-align:center"><strong>+0,6938</strong></td>
+<td style="text-align:center"><strong>48,14%</strong></td>
+<td style="text-align:center">+0,0138</td>
+<td style="text-align:center">0,02%</td>
+</tr>
+<tr>
+<td style="text-align:left">Preço Unitário Final</td>
+<td style="text-align:center">-0,2252</td>
+<td style="text-align:center">5,07%</td>
+<td style="text-align:center">+0,1086</td>
+<td style="text-align:center">1,18%</td>
+<td style="text-align:center"><strong>+0,7011</strong></td>
+<td style="text-align:center"><strong>49,15%</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">Quantidade Final</td>
+<td style="text-align:center"><strong>+0,5656</strong></td>
+<td style="text-align:center"><strong>31,99%</strong></td>
+<td style="text-align:center">-0,1153</td>
+<td style="text-align:center">1,33%</td>
+<td style="text-align:center">+0,2628</td>
+<td style="text-align:center">6,91%</td>
+</tr>
+<tr>
+<td style="text-align:left">Valor Final Pedido</td>
+<td style="text-align:center"><strong>+0,6096</strong></td>
+<td style="text-align:center"><strong>37,17%</strong></td>
+<td style="text-align:center">-0,0593</td>
+<td style="text-align:center">0,35%</td>
+<td style="text-align:center">+0,2937</td>
+<td style="text-align:center">8,63%</td>
+</tr>
+<tr>
+<td style="text-align:left">Diversidade Cesta</td>
+<td style="text-align:center"><strong>+0,4918</strong></td>
+<td style="text-align:center"><strong>24,19%</strong></td>
+<td style="text-align:center">+0,0406</td>
+<td style="text-align:center">0,16%</td>
+<td style="text-align:center">-0,2757</td>
+<td style="text-align:center">7,60%</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Variância Explicada:</strong> PC<sub>1</sub> = 23,22%, PC<sub>2</sub> = 17,25% e PC<sub>3</sub> = 13,68%.</li>
+<li><strong>Variância Retida Acumulada:</strong> <strong>40,47% em 2D</strong> (PC<sub>1</sub> + PC<sub>2</sub>) e <strong>54,15% em 3D</strong> (PC<sub>1</sub> + PC<sub>2</sub> + PC<sub>3</sub>).</li>
+</ul>
+<p><strong>Interpretação Semântica dos Três Eixos:</strong></p>
+<ol>
+<li><strong>PC<sub>1</sub> (Eixo de Escala e Volume da Cesta):</strong> 93,35% de sua variância é conduzida por <code>Valor Final Pedido</code> (37,17%), <code>Quantidade Final</code> (31,99%) e <code>Diversidade Cesta</code> (24,19%). O polo positivo agrupa grandes pedidos e o polo negativo isola compras individuais.</li>
+<li><strong>PC<sub>2</sub> (Eixo de Janela Temporal e Rotina):</strong> 96,91% de sua força provém de <code>Hora do Dia</code> (48,77%) e <code>Turno</code> (48,14%). O polo positivo representa o fim de tarde e noite, enquanto o polo negativo condensa a abertura matinal.</li>
+<li><strong>PC<sub>3</sub> (Eixo de Preço e Categoria de Produto):</strong> 66,93% da força é explicada por <code>Preço Unitário Final</code> (49,15%) e <code>Código Produto</code> (17,78%), isolando itens de padaria artesanal de alto valor unitário de doces populares de baixo tíquete.</li>
+</ol>
+<ul>
+<li><strong>Referências Visuais de Diagnóstico e Dispersão:</strong>
+<ul>
+<li>Gráficos de barras de cargas fatoriais: <a href="figures/02b_pca_loadings_barplots.png"><code>reports/figures/02b_pca_loadings_barplots.png</code></a> e <a href="figures/03b_pca_loadings_3d_triplo.png"><code>reports/figures/03b_pca_loadings_3d_triplo.png</code></a>.</li>
+<li>Projeção 2D com Biplot: <a href="figures/02_pca_2d_clusters_biplot.png"><code>reports/figures/02_pca_2d_clusters_biplot.png</code></a>.</li>
+<li>Projeção 3D (<code>Axes3D</code>): <a href="figures/03_pca_3d_clusters.png"><code>reports/figures/03_pca_3d_clusters.png</code></a>.</li>
+</ul>
+</li>
+</ul>
+<p><img src="figures/02_pca_2d_clusters_biplot.png" alt="Projeção PCA 2D com Biplot de Cargas Fatoriais e Centróides" /></p>
+<p><img src="figures/03_pca_3d_clusters.png" alt="Projeção Tridimensional PCA 3D dos Clusters e Centróides" /></p>
+<hr />
+<h2>7. Análise dos resultados</h2>
+<h3>7.1 Dossiê dos 5 Perfis de Pedidos</h3>
+<p>A Tabela 3 consolida o dossiê estatístico obtido a partir do perfilamento dos centróides empíricos dos clusters no PDV:</p>
+<p><strong>Tabela 3: Caracterização Estatística e Perfil Operacional dos 5 Clusters de Pedidos</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Cluster</th>
+<th style="text-align:left">Nome Operacional</th>
+<th style="text-align:center">Volume (% Base)</th>
+<th style="text-align:center">Horário Médio</th>
+<th style="text-align:center">Turno Predom.</th>
+<th style="text-align:center">Qtd Média</th>
+<th style="text-align:center">Preço Unit. Médio</th>
+<th style="text-align:center">Ticket Médio Pedido</th>
+<th style="text-align:left">SKU Predominante</th>
+<th style="text-align:left">Forma Pagamento</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>C0</strong></td>
+<td style="text-align:left"><strong>Cuca Matinal (Abertura)</strong></td>
+<td style="text-align:center">493 (15,8%)</td>
+<td style="text-align:center">10,0h (7h–11h)</td>
+<td style="text-align:center">Manhã (100%)</td>
+<td style="text-align:center">2,69 un</td>
+<td style="text-align:center">R$ 11,78</td>
+<td style="text-align:center">R$ 29,38</td>
+<td style="text-align:left"><code>CUCA_ALEMÃ</code> (22,5%)</td>
+<td style="text-align:left">Dinheiro (64,3%)</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>C1</strong></td>
+<td style="text-align:left"><strong>Doces Tradicionais (Tarde)</strong></td>
+<td style="text-align:center">1.039 (33,4%)</td>
+<td style="text-align:center">15,7h (12h–22h)</td>
+<td style="text-align:center">Tarde (83,2%)</td>
+<td style="text-align:center">2,78 un</td>
+<td style="text-align:center">R$ 7,07</td>
+<td style="text-align:center">R$ 34,67</td>
+<td style="text-align:left"><code>RAPADURA_MELADO</code> (43,7%)</td>
+<td style="text-align:left">Dinheiro (62,7%)</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>C2</strong></td>
+<td style="text-align:left"><strong>Padaria Familiar (Rush Cucas)</strong></td>
+<td style="text-align:center">941 (30,2%)</td>
+<td style="text-align:center">15,6h (12h–22h)</td>
+<td style="text-align:center">Tarde (82,5%)</td>
+<td style="text-align:center">1,34 un</td>
+<td style="text-align:center">R$ 22,13</td>
+<td style="text-align:center">R$ 32,60</td>
+<td style="text-align:left"><code>CUCA_ALEMÃ</code> (71,4%)</td>
+<td style="text-align:left">Dinheiro (52,9%)</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>C3</strong></td>
+<td style="text-align:left"><strong>Lanche Rápido (Alfajor)</strong></td>
+<td style="text-align:center">627 (20,1%)</td>
+<td style="text-align:center">15,7h (12h–22h)</td>
+<td style="text-align:center">Tarde (80,1%)</td>
+<td style="text-align:center">2,83 un</td>
+<td style="text-align:center">R$ 6,44</td>
+<td style="text-align:center">R$ 44,92</td>
+<td style="text-align:left"><code>ALFAJOR</code> (65,2%)</td>
+<td style="text-align:left">Dinheiro (54,4%)</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>C4</strong></td>
+<td style="text-align:left"><strong>Atacado / Grandes Encomendas</strong></td>
+<td style="text-align:center">13 (0,4%)</td>
+<td style="text-align:center">14,8h (13h–21h)</td>
+<td style="text-align:center">Tarde (84,6%)</td>
+<td style="text-align:center">86,62 un</td>
+<td style="text-align:center">R$ 10,42</td>
+<td style="text-align:center">R$ 2.839,38</td>
+<td style="text-align:left"><code>RAPADURA_ASSADA</code> (30,8%)</td>
+<td style="text-align:left">Dinheiro (84,6%)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Referência Visual do Heatmap de Centróides:</strong> <a href="figures/04_heatmap_centroides_clusters.png"><code>reports/figures/04_heatmap_centroides_clusters.png</code></a>.</li>
+</ul>
+<p><img src="figures/04_heatmap_centroides_clusters.png" alt="Heatmap dos Centróides dos Clusters (Desvios Padrão Z-Score)" /></p>
+<h3>7.2 Interpretação dos Agrupamentos</h3>
+<ol>
+<li><strong>Cluster 0 — Cuca Matinal (15,8%):</strong> Concentra as compras realizadas exclusivamente durante a abertura e manhã da feira (100% no turno manhã), com foco em produtos frescos de panificação para café matinal (<code>CUCA_ALEMÃ</code> e <code>CUCA_ENROLADA</code>).</li>
+<li><strong>Cluster 1 — Doces Tradicionais (33,4%):</strong> Maior segmento da feira, concentrado no rush da tarde com itens coloniais de desembolso acessível (<code>RAPADURA_MELADO</code> e <code>RAPADURA_ASSADA</code> com preço médio de R$ 7,07).</li>
+<li><strong>Cluster 2 — Padaria Familiar / Rush das Cucas (30,2%):</strong> Representa a compra de cucas artesanais inteiras de alto valor agregado (R$ 22,13 a R$ 25,00) destinadas ao consumo familiar em casa ou para viagem, com 71,4% de predominância da <code>CUCA_ALEMÃ</code>.</li>
+<li><strong>Cluster 3 — Lanche Rápido / Alfajor (20,1%):</strong> Segmento voltado para consumo imediato durante a circulação nos pavilhões da feira, dominado por <code>ALFAJOR</code> (65,2%) a R$ 6,00 a R$ 6,50 a unidade, acompanhado de <code>AMENDOIM_TEMPERADO</code> e <code>BOLACHA</code>.</li>
+<li><strong>Cluster 4 — Atacado / Grandes Encomendas (0,4%):</strong> Pedidos atípicos de compra corporativa ou revenda em feiras, com média de 86,62 unidades e tíquete médio de R$ 2.839,38, essencialmente quitados em dinheiro em espécie.</li>
+</ol>
+<h3>7.3 Discussão Crítica e Limitações Identificadas</h3>
+<ul>
+<li><strong>Natureza Transacional Anônima:</strong> Pela ausência de cadastro de clientes, os agrupamentos não refletem traços demográficos, perfil socioeconômico ou frequência histórica de compradores individuais. O modelo classifica <strong>perfis de cestas de compra</strong> e momentos de PDV.</li>
+<li><strong>Assimetria no Cluster de Atacado (C4):</strong> Composto por 13 transações (0,4% da amostra), o segmento de atacado reflete ocorrências reais de feiras do agronegócio. Sua separação em um cluster dedicado é essencial para evitar a contaminação e a distorção das médias dos demais 4 clusters de varejo comum.</li>
+<li><strong>Variância Explicada do PCA (54,15% em 3D):</strong> A retenção parcial da variância total reflete a natureza mista do espaço de atributos, onde variáveis ordinais e categóricas codificadas (<code>prod_code</code>, <code>turno_code</code>) geram ortogonalidade não-linear. O particionamento original do K-Means atua sobre as 8 variáveis completas, mantendo rigorosa coesão estatística.</li>
+</ul>
+<hr />
+<h2>8. Demonstração de funcionamento</h2>
+<h3>8.1 Simulação de Inferência em Tempo Real no Checkout</h3>
+<p>O pipeline de inferência foi validado simulando o fechamento de um pedido avulso de 1 Alfajor Preto (R$ 6,00) às 16:00 (Tarde) pago em Dinheiro:</p>
+<ul>
+<li><strong>Codificação e Escalonamento:</strong> A instância de entrada é normalizada pelas mesmas regras de <code>LabelEncoder</code> e <code>StandardScaler</code> ajustadas no pipeline.</li>
+<li><strong>Predição do Agrupamento:</strong> O modelo determinístico mapeia a transação no <strong>Cluster 3: Lanche Rápido (Alfajor)</strong>.</li>
+<li><strong>Gatilho de Cross-Selling:</strong> Disparo da regra associada ao perfil:
+<blockquote>
+<p><em>&quot;Sugestão PDV: Leve mais 3 Alfajores com desconto progressivo no pacote x4!&quot;</em></p>
+</blockquote>
+</li>
+<li><strong>Referência Visual da Simulação:</strong> Figura <a href="figures/05_simulacao_checkout_recomendacao.png"><code>reports/figures/05_simulacao_checkout_recomendacao.png</code></a>.</li>
+</ul>
+<p><img src="figures/05_simulacao_checkout_recomendacao.png" alt="Simulação de Inferência em Tempo Real no Checkout do PDV" /></p>
+<h3>8.2 Execução via Script de Linha de Comando (<code>cli.py</code>)</h3>
+<p>A execução prática da inferência é encapsulada na ferramenta de linha de comando <a href="../cli.py"><code>cli.py</code></a>, que consome o artefato persistido <a href="../modelo_checkout.joblib"><code>modelo_checkout.joblib</code></a>. O script exige a especificação explícita dos 6 atributos da transação, sem valores padrão arbitrários.</p>
+<p><strong>Demonstração 1: Simulação de Lanche Rápido (Cluster C3)</strong></p>
+<pre><code class="language-bash">python cli.py --produto &quot;Alfajor Preto&quot; --hora 16 --preco 6.0 --quantidade 1 --metodo Dinheiro --itens 1
+</code></pre>
+<p><em>Saída do Terminal:</em></p>
+<pre><code class="language-text">============================================================
+              KALIMENTOS - CHECKOUT INTELIGENTE             
+============================================================
+  Produto no Carrinho : ALFAJOR (R$ 6.00)
+  Quantidade          : 1 un (Total do Item: R$ 6.00)
+  Horario da Compra   : 16h (Turno: Tarde)
+  Forma de Pagamento  : Dinheiro
+  Itens no Pedido     : 1 item(ns) (Valor Final: R$ 6.00)
+------------------------------------------------------------
+  Cluster Predito     : [3] C3: Lanche Rápido (Alfajor)
+------------------------------------------------------------
+  SUGESTAO DE VENDA (CROSS-SELLING):
+  &gt;&gt; Sugestao PDV: Leve mais 3 Alfajores com desconto progressivo no pacote x4!
+============================================================
+</code></pre>
+<p><strong>Demonstração 2: Simulação de Padaria Matinal (Cluster C0)</strong></p>
+<pre><code class="language-bash">python cli.py --produto &quot;Cuca Alemã&quot; --hora 10 --preco 22.0 --quantidade 2 --metodo Pix --itens 1
+</code></pre>
+<p><em>Saída do Terminal:</em></p>
+<pre><code class="language-text">============================================================
+              KALIMENTOS - CHECKOUT INTELIGENTE             
+============================================================
+  Produto no Carrinho : CUCA_ALEMÃ (R$ 22.00)
+  Quantidade          : 2 un (Total do Item: R$ 44.00)
+  Horario da Compra   : 10h (Turno: Manhã)
+  Forma de Pagamento  : Pix
+  Itens no Pedido     : 1 item(ns) (Valor Final: R$ 44.00)
+------------------------------------------------------------
+  Cluster Predito     : [0] C0: Cuca Matinal (Abertura)
+------------------------------------------------------------
+  SUGESTAO DE VENDA (CROSS-SELLING):
+  &gt;&gt; Sugestao PDV: Adicione Cuca Alema Quentinha ou Biscoito Colonial ao Cafe da Manha!
+============================================================
+</code></pre>
+<h3>8.3 Guardrails e Validação de Entradas no CLI</h3>
+<p>O script implementa barreiras de validação de qualidade:</p>
+<ol>
+<li><strong>Bloqueio de Omissão de Argumentos:</strong> Caso algum dos 6 parâmetros seja omitido, a execução é abortada listando o campo ausente e orientando a sintaxe correta.</li>
+<li><strong>Rejeição de Formas de Pagamento Inválidas:</strong> Apenas formas de pagamento homologadas (<code>Dinheiro</code>, <code>Cartão</code>, <code>Pix</code>) são aceitas.</li>
+<li><strong>Autocorreção Inteligente de Grafia (Typos):</strong> Ao informar <code>--produto &quot;alfajo&quot;</code>, o sistema detecta a divergência via proximidade de Levenshtein e sugere automaticamente a substituição pela família homologada <code>ALFAJOR</code>.</li>
+<li><strong>Script de Demonstração Interativa:</strong> Todos os fluxos de apresentação oral e validação dos guardrails estão unificados no runner executável <a href="../demo.sh"><code>demo.sh</code></a>.</li>
+</ol>
+<hr />
+<h2>9. Extensão opcional: Harness Operacional de Agentes de IA</h2>
+<h3>9.1 Arquitetura Agêntica Especializada</h3>
+<p>Para garantir governança, rastreabilidade e integridade no ciclo de vida de Machine Learning, estabeleceu-se uma arquitetura multi-agente formalizada no arquivo <a href="../AGENTS.md"><code>AGENTS.md</code></a>. O fluxo foi orquestrado por três personas com responsabilidades segregadas:</p>
+<ol>
+<li><strong>Agente 1 — EDA &amp; Feature Engineering Agent:</strong>
+<ul>
+<li>Auditoria de qualidade contábil e descarte de dados espúrios.</li>
+<li>Cálculo de fatores de escala de embalagens e harmonização contábil (Portão 4.6.6 com 100% de conformidade).</li>
+<li>Enriquecimento temporal e geração de <a href="../base.csv"><code>base.csv</code></a>.</li>
+</ul>
+</li>
+<li><strong>Agente 2 — Model Tuning &amp; Validation Agent:</strong>
+<ul>
+<li>Varredura de hiperparâmetros de <i>K</i> ∈ [2, 8] e validação cruzada pelas 4 métricas intrínsecas.</li>
+<li>Treinamento do modelo definitivo <code>KMeans(n_clusters=5, random_state=42, n_init=10)</code>.</li>
+<li>Decomposição PCA (2D Biplot e 3D) com cálculo rigoroso de cargas fatoriais.</li>
+<li>Exportação do modelo para <a href="../modelo_checkout.joblib"><code>modelo_checkout.joblib</code></a> e construção do <a href="../cli.py"><code>cli.py</code></a>.</li>
+</ul>
+</li>
+<li><strong>Agente 3 — Report &amp; Documentation Agent:</strong>
+<ul>
+<li>Consolidação analítica dos resultados empíricos, tabelas e métricas.</li>
+<li>Elaboração do diário de bordo (<a href="../diario_de_bordo.md"><code>diario_de_bordo.md</code></a>) e do relatório técnico oficial.</li>
+</ul>
+</li>
+</ol>
+<h3>9.2 Harness Operacional e Guardrails Implementados</h3>
+<p>A operação dos agentes foi governada pelos seguintes pilares de contenção:</p>
+<ul>
+<li><strong>Contexto Operacional Estrito:</strong> Varejo de PDV em feiras agropecuárias com clientes anônimos, vedando segmentações fictícias por histórico demográfico.</li>
+<li><strong>Ferramental Homologado:</strong> Restrição estrita à stack do ambiente virtual (<code>pandas</code>, <code>scikit-learn</code>, <code>matplotlib</code>, Python 3.14).</li>
+<li><strong>Imutabilidade Absoluta de Dados Brutos:</strong> Proibição de escrita sobre <a href="../studing/KalimentosFeirasVendas.csv"><code>studing/KalimentosFeirasVendas.csv</code></a> e <a href="../get_dataset.sql"><code>get_dataset.sql</code></a>.</li>
+<li><strong>Prevenção de Data Leakage:</strong> Ajuste de transformadores (<code>StandardScaler</code>) estritamente na fase de treino, com replicação via <code>.transform()</code> na inferência.</li>
+<li><strong>Determinismo Científico:</strong> Fixação de <code>random_state=42</code> em todos os processos estocásticos.</li>
+<li><strong>Validações e Quality Gates:</strong> Portão matemático mandatória no fechamento contábil dos pedidos e validação sem defaults nas interfaces de predição.</li>
+</ul>
+<hr />
+<h2>10. Conclusão</h2>
+<p>O projeto cumpriu integralmente os requisitos do Trabalho 1 de Inteligência Artificial II:</p>
+<ol>
+<li>Conduziu exploração profunda e saneamento contábil sobre transações reais de PDV de feiras.</li>
+<li>Identificou com rigor matemático a existência de 5 clusters naturais de pedidos, respaldados pela inércia e pelo índice Calinski-Harabasz.</li>
+<li>Caracterizou semântica e operacionalmente cada agrupamento através de projeções bidimensionais e tridimensionais com cargas fatoriais no PCA.</li>
+<li>Demonstrou a viabilidade prática da solução através de um motor determinístico de inferência de checkout com CLI auditável, fornecendo a base técnica para futura aplicação de recomendação de produtos em e-commerce.</li>
+</ol>
+
+</body>
+</html>

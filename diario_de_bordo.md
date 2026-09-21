@@ -154,3 +154,14 @@ A Seção 8 do notebook [`eda_v2.ipynb`](./eda_v2.ipynb) foi completamente refat
 - **Preservação de Guardrails e Materiais do Harness:**
   - Mantidos integralmente os datasets de referência em `studing/` e o acervo didático/pedagógico em `content/` (`CD/`, `IA-1/`, `IA-2/`) que embasam o harness acadêmico e as especificações da disciplina.
   - Atualizadas as referências estruturais no [`README.md`](./README.md).
+
+*Elaboração do Relatório Técnico Oficial e Compilação em PDF (`reports/relatorio_final.md` e `reports/relatorio_final.pdf`):*
+- **Estruturação Rigorosa Conforme Template Oficial da AMF:**
+  - Redação técnica abrangendo as 9 seções obrigatórias: *1. Dataset*, *2. Problema e objetivo*, *3. Exploração e preparação dos dados*, *4. Estratégia experimental*, *5. Modelagem*, *6. Avaliação*, *7. Análise dos resultados*, *8. Demonstração de funcionamento* e *9. Extensão opcional (Harness de Agentes)*.
+- **Conformidade com os Guardrails de Não-Alucinação e Escopo:**
+  - Vendas estritamente anônimas de balcão (sem criação de perfis demográficos ou históricos de fidelidade individual inexistentes no PDV de feiras).
+  - Foco exclusivo em agrupamento não supervisionado de pedidos e sua aplicação como hipótese futura para motor de recomendação (cross-selling) no checkout de e-commerce.
+  - Inclusão exata das tabelas empíricas geradas pelo pipeline: diagnóstico paramétrico de $K \in [2, 8]$ (destaque para o pico global de Calinski-Harabasz em $K=5$ de 788,31), matriz tridimensional de cargas fatoriais e contribuições do PCA (40,47% em 2D e 54,15% em 3D), e dossiê dos 5 centróides do PDV.
+- **Compilação Automatizada de Alta Resolução em PDF:**
+  - Pipeline de renderização em HTML/CSS acadêmico (estilos de página A4, tipografia limpa, quebra de página automática em seções e isolamento de tabelas/figuras) e compilação headless via Google Chrome para [`reports/relatorio_final.pdf`](./reports/relatorio_final.pdf) (13 páginas, 2,5 MB com as 7 figuras integradas).
+- **Checklist Operacional Final:** Todos os itens do checklist do [`AGENTS.md`](./AGENTS.md) validados com 100% de sucesso.
