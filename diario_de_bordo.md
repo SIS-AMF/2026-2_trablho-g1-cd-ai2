@@ -55,3 +55,22 @@ A Seção 4.6 do notebook [`eda_v2.ipynb`](./eda_v2.ipynb) foi refatorada e desa
 3. **4.6.3 Consolidação no Dataset Principal:** Integração das grandezas auditadas e metadados de linhagem diretamente no DataFrame corporativo oficial (`df`).
 4. **4.6.4 Isolamento da Quarentena Residual:** Governança preventiva isolando transações anômalas em `df_quarentena_audit` (0 registros / 100% de conformidade contábil).
 5. **4.6.5 Demonstração de Prova Real (Antes vs. Depois):** Comparação tabular transparente de pedido ajustado demonstrando delta contábil zero.
+
+*Aprimoramento do Cálculo Proporcional (Eliminação de Magic Numbers):*
+- Substituição da constante empírica `preco >= 10.0` por um modelo estatístico robusto baseado na proximidade à escala central típica do SKU: $|\frac{P}{k} - \tilde{P}_{\text{SKU}}| < |P - \tilde{P}_{\text{SKU}}|$.
+- **Preservação de flutuações unitárias:** Variações naturais no preço de venda unitário (ex.: doces entre R$ 5,00 e R$ 7,00) são respeitadas e mantidas.
+- **Harmonização de Fardos Fechados:** 11 pedidos onde clientes compraram fardos unitários (ex.: 1 pacote de alfajor x4 por R$ 20) foram harmonizados para unidades físicas de consumo ($Q_{\text{final}} = Q \times k$ e $P_{\text{final}} = P / k$), preservando 100% da integridade do subtotal e reduzindo o desvio padrão dos preços de todos os produtos para `0.0000`.
+- Inclusão do metadado `tipo_escala` em `base.csv` para rastreabilidade de linhagem.
+
+*Correção Precoce de Nomenclatura no Cadastro do PDV (Rapadura Grão Moído Pacote x3):*
+- Identificou-se que o produto `Rapadura de Melado Grão Moído (Pacote x1)` foi cadastrado com erro de digitação no PDV, correspondendo na realidade a um fardo com 3 unidades vendido por R$ 20,00.
+- A correção foi posicionada precocemente na Seção 2 (Carga e Sanitização Inicial) na coluna `nome_produto`, preservando `nome_produto_bruto` para auditoria.
+- Com isso, a Seção 4 extraiu automaticamente $k = 3$, convertendo as 16 transações para 3 unidades de consumo a R$ 6,67 (estabilizando o desvio padrão em 0.0000 com conservação contábil perfeita de R$ 20,00), e a Seção 5 consolidou o rótulo `RAPADURA_DE_MELADO_GRÃO_MOÍDO_(PACOTE_X3)` no dicionário `mapa_produtos`.
+
+*Saneamento de Registros Espúrios com Quantidade Zerada (Outliers de Digitação no PDV):*
+- **Detecção e Auditoria Granular:** Identificaram-se 2 registros espúrios com `quantidade_item == 0` no início do pipeline (Seção 2.1 de `eda_v2.ipynb`):
+  1. `ebbed809-e6f4-4b4a-9850-60eaa218e98b` (Expo Afubra): `Alfajor Preto (Caixa x16)` com quantidade 0 (o pedido continha também `Alfajor Preto (Pacote x4)` com quantidade 4 a R$ 5,00, totalizando os R$ 20,00 do subtotal).
+  2. `4680d5c5-3262-4e60-829e-5a9f976edaff` (EXPOBENTO): `Rapadura de Melado` com quantidade 0 (o pedido continha também `Rapadura de Melado (Pacote x3)` com quantidade 3 a R$ 6,67, totalizando os R$ 20,00 do subtotal).
+- **Prova Real de Não-Impacto:** Como $Q = 0 \implies Q \times P = \text{R\$\,}0,00$, a remoção não afeta o balanço financeiro dos pedidos, que continuam fechando exatamente os R$ 20,00 de subtotal.
+- **Preservação Amostral:** Nenhum pedido foi descartado (2.457 pedidos únicos mantidos 100%).
+- **Efeito Sanitizador:** Ajuste correto da diversidade da cesta (`qnt_repeticoes` passou de 2 para 1 em ambos os pedidos) e `base.csv` exportado com 3.113 linhas estritamente íntegras.

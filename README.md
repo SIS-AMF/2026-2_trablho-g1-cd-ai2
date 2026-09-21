@@ -72,8 +72,8 @@ A organização do projeto segue as melhores práticas de engenharia de dados e 
 Os dados brutos foram extraídos do banco de dados operacional de vendas da empresa via query SQL ([`get_dataset.sql`](file:///home/lucas/Projects/EDA/get_dataset.sql)), padronizando o fuso horário para `America/Sao_Paulo`.
 
 - **Granularidade:** Transações no **nível de item do pedido** (`itens_pedido` associados a `pedidos` e `finance_events`).
-- **Volume:** **3.115 registros** de itens vendidos em **2.457 pedidos únicos**, cobrindo o período de março a setembro de 2026.
-- **Feiras contempladas:** 12 eventos regionais com predominância de *Expointer 2026* (705 itens), *Expo Afubra* (611 itens), *Wolksfest Agudo* (424 itens), *ExpoDireto* (405 itens) e *EXPOBENTO* (304 itens).
+- **Volume:** **3.115 registros brutos**, saneados para **3.113 registros de itens efetivamente comercializados** (após descarte de 2 registros fantasmas com quantidade zerada no PDV) distribuídos em **2.457 pedidos únicos** (100% dos pedidos preservados), cobrindo o período de março a setembro de 2026.
+- **Feiras contempladas:** 12 eventos regionais com predominância de *Expointer 2026* (705 itens), *Expo Afubra* (610 itens após saneamento), *Wolksfest Agudo* (424 itens), *ExpoDireto* (405 itens) e *EXPOBENTO* (303 itens após saneamento).
 
 ### 3.2. Limpeza e Tratamento dos Dados
 1. **Auditoria de Integridade Financeira:** Foi verificado que $100\%$ dos registros satisfazem a relação:
@@ -82,14 +82,18 @@ Os dados brutos foram extraídos do banco de dados operacional de vendas da empr
 2. **Eliminação de Colunas Irrelevantes e Inconsistentes:**
    - Descarte das datas de vigência do evento (`evento_data_inicio`, `evento_data_fim`).
    - Descarte de `item_pedido_user_id` e `pedido_vendedor`: nas feiras, múltiplos atendentes operam o mesmo terminal de caixa sob a mesma credencial de login. Esse dado não reflete a autoria fidedigna do atendimento, além de ser irrelevante para o agrupamento de cestas de consumo.
-3. **Tratamento de Datas e Fusos:** Conversão de strings timestamp mistas para `datetime64[ns, America/Sao_Paulo]` com inferência robusta.
-4. **Validação de Integridade Transacional (Data Quality — Itens vs. Subtotal):**
+3. **Saneamento de Registros Espúrios com Quantidade Zerada:**
+   - Descarte de 2 registros fantasmas com quantidade zerada ($\le 0$) decorrentes de cancelamentos operacionais no PDV: um item de alfajor na Expo Afubra e uma rapadura na EXPOBENTO.
+   - **Conservação Contábil:** Em ambos os pedidos, a remoção da linha zerada conservou 100% do subtotal original (R$ 20,00), mantendo todos os 2.457 pedidos íntegros e ajustando com exatidão a diversidade real da cesta (`qnt_repeticoes`).
+4. **Tratamento de Datas e Fusos:** Conversão de strings timestamp mistas para `datetime64[ns, America/Sao_Paulo]` com inferência robusta.
+5. **Validação de Integridade Transacional (Data Quality — Itens vs. Subtotal):**
    - Comparação da soma dos itens $\sum(\text{quantidade} \times \text{preço\_unitário})$ contra o `pedido_subtotal` com tolerância de $R\$\,0,01$.
    - **Resultado Bruto Inicial:** **94,34% (2.318 pedidos)** apresentam cálculo perfeito, enquanto **5,66% (139 pedidos)** apresentam discrepâncias severas causadas pelo apontamento de preços de embalagens fechadas (*Caixa x16*, *Pacote x6*, etc.) mantendo a quantidade de unidades avulsas.
-5. **Mecanismo de Correção por Proporção com Fallback Condicional (Double-Check):**
-   - Em conformidade com o princípio da **não-destrutividade**, os dados brutos originais foram preservados em colunas próprias e os valores proporcionais derivados em novas colunas (`quantidade_ajustada`, `preco_unitario_ajustado`, `valor_item_ajustado`).
-   - **Orquestração de Fallback:** Se o cálculo tradicional bate com o subtotal contábil ($\Delta \le 0,01$), os dados originais são mantidos intactos (`status_validacao = 'ORIGINAL_VALIDO'`: 2.318 pedidos). Se o cálculo tradicional divergir mas a proporção do fator $k$ fechar o subtotal, o valor proporcional é adotado (`status_validacao = 'AJUSTADO_PROPORCAO'`: 139 pedidos).
-   - **Resultado Consolidado:** **100,00% de conformidade contábil (2.457 de 2.457 pedidos)** com **0 regressões** e **0 pedidos em quarentena residual**.
+6. **Mecanismo de Correção por Proporção com Fallback Condicional (Double-Check sem Magic Numbers):**
+   - Em conformidade com o princípio da **não-destrutividade**, os dados brutos originais foram preservados em colunas próprias e os valores proporcionais derivados em novas colunas (`quantidade_ajustada`, `preco_unitario_ajustado`, `valor_item_ajustado`, `tipo_escala`).
+   - **Identificação Estatística de Escala:** Em vez de constantes ou números mágicos arbitrários, o modelo compara a proximidade do preço à mediana do SKU ($|\frac{P}{k} - \tilde{P}_{\text{SKU}}| < |P - \tilde{P}_{\text{SKU}}|$), preservando flutuações unitárias legítimas (R$ 5 a R$ 7) e identificando preços de embalagem fechada.
+   - **Orquestração de Fallback e Harmonização:** Se o cálculo tradicional bate com o subtotal contábil ($\Delta \le 0,01$), os dados originais são mantidos (`status_validacao = 'ORIGINAL_VALIDO'`: 2.318 pedidos). Se o tradicional divergir mas a proporção do fator $k$ fechar o subtotal, o valor proporcional é adotado (`status_validacao = 'AJUSTADO_PROPORCAO'`: 139 pedidos). Para vendas de pacotes fechados em unidades unitárias, a harmonização converte para unidades físicas de consumo sem alterar o subtotal.
+   - **Resultado Consolidado:** **100,00% de conformidade contábil (2.457 de 2.457 pedidos)** com **0 regressões**, **0 pedidos em quarentena residual** e **desvio padrão de preços de produtos com multiplicador estabilizado em 0.0000**.
 
 
 ### 3.3. Engenharia de Atributos (Feature Engineering)
@@ -100,6 +104,7 @@ As transformações desenvolvidas em [`eda_v2.ipynb`](file:///home/lucas/Project
 | `nome_produto_bruto` | Texto | Nome original de cadastro preservado para fins de auditoria e rastreabilidade. |
 | `nome_produto` | Categórico | Nome canônico padronizado após consolidação semântica de famílias. |
 | `fator_k` | Inteiro | Multiplicador de embalagem extraído via regex (`x16`, `x6`, `x4`, etc.). |
+| `tipo_escala` | Texto | Diagnóstico estatístico da escala do item (`UNITARIO`, `PACOTE_FRACIONADO`, `PRECO_EMBALAGEM_CORRIGIDO`). |
 | `status_validacao` | Texto | Rótulo de auditoria do fallback (`ORIGINAL_VALIDO` vs. `AJUSTADO_PROPORCAO`). |
 | `quantidade_final` | Inteiro | Volume numérico harmonizado em unidades físicas reais de consumo. |
 | `preco_unitario_final` | Float | Preço unitário real por unidade física (desvio padrão estabilizado). |
