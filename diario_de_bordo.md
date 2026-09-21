@@ -33,3 +33,8 @@ Reorganização estrutural e modular do notebook [`eda_v2.ipynb`](./eda_v2.ipynb
 7. Sandbox Experimental de Agrupamento Não Supervisionado (prototipagem do K-Means e PCA desacoplados do pré-processamento).
 
 *Decisão arquitetural adicional:* Descarte da coluna `pedido_vendedor` (e `item_pedido_user_id`) logo na Seção 2 do pipeline. Motivo: nas feiras, os atendentes se alternam no mesmo terminal com login único/compartilhado, tornando o dado de autoria do vendedor corrompido, inconsistente e irrelevante para a clusterização de perfis de cestas no checkout. Com isso, eliminou-se também o `LabelBinarizer` na Seção 6 e a `base.csv` passou a ter 16 colunas limpas.
+
+*Adição da Seção 4 — Validação de Integridade (Data Quality):*
+Implementação de auditoria transacional comparando a soma dos itens de cada pedido ($\sum \text{quantidade} \times \text{preço\_unitário}$) com o subtotal do cabeçalho (`pedido_subtotal`), via `np.isclose(..., atol=0.01)`.
+- **Resultado:** 2.318 pedidos válidos (94,34%) vs. 139 pedidos divergentes (5,66%).
+- **Exibição dos Dados Divergentes:** Apresentação da tabela de pedidos divergentes com deltas, tabela transacional com os 185 itens afetados e ranking de SKUs mais frequentes (*Rapadura Assada Pacote x6*, *Alfajor Preto Pacote x4* e *Rapadura Melado Pacote x3*), comprovando que o alto desvio decorre do apontamento do valor da embalagem fechada no preço unitário.

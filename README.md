@@ -83,6 +83,10 @@ Os dados brutos foram extraídos do banco de dados operacional de vendas da empr
    - Descarte das datas de vigência do evento (`evento_data_inicio`, `evento_data_fim`).
    - Descarte de `item_pedido_user_id` e `pedido_vendedor`: nas feiras, múltiplos atendentes operam o mesmo terminal de caixa sob a mesma credencial de login. Esse dado não reflete a autoria fidedigna do atendimento, além de ser irrelevante para o agrupamento de cestas de consumo.
 3. **Tratamento de Datas e Fusos:** Conversão de strings timestamp mistas para `datetime64[ns, America/Sao_Paulo]` com inferência robusta.
+4. **Validação de Integridade Transacional (Data Quality — Itens vs. Subtotal):**
+   - Comparação da soma dos itens $\sum(\text{quantidade} \times \text{preço\_unitário})$ contra o `pedido_subtotal` com tolerância de $R\$\,0,01$.
+   - **Resultado:** **94,34% (2.318 pedidos)** apresentam cálculo perfeito, enquanto **5,66% (139 pedidos)** apresentam discrepâncias severas causadas pelo apontamento de preços de embalagens fechadas (*Caixa x16*, *Pacote x6*, etc.) mantendo a quantidade de unidades avulsas.
+
 
 ### 3.3. Engenharia de Atributos (Feature Engineering)
 As transformações desenvolvidas em [`eda_v2.ipynb`](file:///home/lucas/Projects/EDA/eda_v2.ipynb) resultaram no dataset consolidado [`base.csv`](file:///home/lucas/Projects/EDA/base.csv) (16 colunas tratadas):
