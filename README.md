@@ -85,24 +85,31 @@ Os dados brutos foram extraídos do banco de dados operacional de vendas da empr
 3. **Tratamento de Datas e Fusos:** Conversão de strings timestamp mistas para `datetime64[ns, America/Sao_Paulo]` com inferência robusta.
 4. **Validação de Integridade Transacional (Data Quality — Itens vs. Subtotal):**
    - Comparação da soma dos itens $\sum(\text{quantidade} \times \text{preço\_unitário})$ contra o `pedido_subtotal` com tolerância de $R\$\,0,01$.
-   - **Resultado:** **94,34% (2.318 pedidos)** apresentam cálculo perfeito, enquanto **5,66% (139 pedidos)** apresentam discrepâncias severas causadas pelo apontamento de preços de embalagens fechadas (*Caixa x16*, *Pacote x6*, etc.) mantendo a quantidade de unidades avulsas.
+   - **Resultado Bruto Inicial:** **94,34% (2.318 pedidos)** apresentam cálculo perfeito, enquanto **5,66% (139 pedidos)** apresentam discrepâncias severas causadas pelo apontamento de preços de embalagens fechadas (*Caixa x16*, *Pacote x6*, etc.) mantendo a quantidade de unidades avulsas.
+5. **Mecanismo de Correção por Proporção com Fallback Condicional (Double-Check):**
+   - Em conformidade com o princípio da **não-destrutividade**, os dados brutos originais foram preservados em colunas próprias e os valores proporcionais derivados em novas colunas (`quantidade_ajustada`, `preco_unitario_ajustado`, `valor_item_ajustado`).
+   - **Orquestração de Fallback:** Se o cálculo tradicional bate com o subtotal contábil ($\Delta \le 0,01$), os dados originais são mantidos intactos (`status_validacao = 'ORIGINAL_VALIDO'`: 2.318 pedidos). Se o cálculo tradicional divergir mas a proporção do fator $k$ fechar o subtotal, o valor proporcional é adotado (`status_validacao = 'AJUSTADO_PROPORCAO'`: 139 pedidos).
+   - **Resultado Consolidado:** **100,00% de conformidade contábil (2.457 de 2.457 pedidos)** com **0 regressões** e **0 pedidos em quarentena residual**.
 
 
 ### 3.3. Engenharia de Atributos (Feature Engineering)
-As transformações desenvolvidas em [`eda_v2.ipynb`](file:///home/lucas/Projects/EDA/eda_v2.ipynb) resultaram no dataset consolidado [`base.csv`](file:///home/lucas/Projects/EDA/base.csv) (16 colunas tratadas):
+As transformações desenvolvidas em [`eda_v2.ipynb`](file:///home/lucas/Projects/EDA/eda_v2.ipynb) resultaram no dataset consolidado [`base.csv`](file:///home/lucas/Projects/EDA/base.csv), estruturado com total transparência de linhagem:
 
 | Atributo Criado / Tratado | Tipo | Descrição e Racional Técnico |
 | :--- | :--- | :--- |
-| `nome_produto_bruto` | Texto | Nome original preservado intacto para fins de auditoria de escala e embalagens. |
-| `nome_produto` | Categórico | Nome higienizado com substituição de caracteres especiais e maiúsculas. |
-| `quantidade_item` | Inteiro | Volume numérico de unidades do item na linha do pedido. |
-| `preco_unitario_item` | Float | Preço unitário faturado no momento da venda. |
-| `qnt_repeticoes` | Categórico / Inteiro | Contagem de linhas por `pedido_id`. Identifica a diversidade de itens no mesmo carrinho (compras simples vs. compras combinadas). |
-| `mes` | Inteiro (1–12) | Mês do evento, permitindo capturar sazonalidades ao longo do ano. |
-| `dia_semana` | Inteiro (0–6) | Dia da semana (0=Segunda-feira a 6=Domingo), diferenciando o fluxo de dias úteis e finais de semana da feira. |
-| `dia_horario` | Inteiro (0–23) | Hora inteira da transação (picos de almoço, meio de tarde e fechamento de feira). |
-| `turno` | Categórico | Binning temporal via `pd.cut`: *Madrugada* (0h–5h), *Manhã* (6h–11h), *Tarde* (12h–17h) e *Noite* (18h–23h). |
-| `metodo_pagamento` | Categórico | Forma de pagamento utilizada (*Dinheiro*: 58,4%, *Cartão*: 31,6%, *Pix*: 10,0%). |
+| `nome_produto_bruto` | Texto | Nome original de cadastro preservado para fins de auditoria e rastreabilidade. |
+| `nome_produto` | Categórico | Nome canônico padronizado após consolidação semântica de famílias. |
+| `fator_k` | Inteiro | Multiplicador de embalagem extraído via regex (`x16`, `x6`, `x4`, etc.). |
+| `status_validacao` | Texto | Rótulo de auditoria do fallback (`ORIGINAL_VALIDO` vs. `AJUSTADO_PROPORCAO`). |
+| `quantidade_final` | Inteiro | Volume numérico harmonizado em unidades físicas reais de consumo. |
+| `preco_unitario_final` | Float | Preço unitário real por unidade física (desvio padrão estabilizado). |
+| `valor_item_final` | Float | Total monetário faturado na linha do pedido ($\text{quantidade\_final} \times \text{preco\_final}$). |
+| `qnt_repeticoes` | Categórico / Inteiro | Contagem de itens no mesmo `pedido_id` (indicador de diversidade da cesta). |
+| `mes` | Inteiro (1–12) | Mês da feira (captura de sazonalidade anual). |
+| `dia_semana` | Inteiro (0–6) | Dia da semana (0=Segunda-feira a 6=Domingo), diferenciando dias úteis e fins de semana. |
+| `dia_horario` | Inteiro (0–23) | Hora inteira da transação (picos de almoço, tarde e encerramento). |
+| `turno` | Categórico | Segmentação temporal via `pd.cut`: *Madrugada*, *Manhã*, *Tarde*, *Noite*. |
+| `metodo_pagamento` | Categórico | Meio de pagamento utilizado (*Dinheiro*, *Cartão*, *Pix*). |
 
 ### 3.4. Normalização Textual e Agrupamento Semântico de Produtos
 No PDV original, variações de apresentação do mesmo produto apareciam como strings distintas (ex.: displays, caixas com 16 unidades, pacotes com 4 unidades ou potes). Para viabilizar a clusterização sem dispersão excessiva de dimensionalidade:

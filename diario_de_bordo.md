@@ -38,3 +38,20 @@ Reorganização estrutural e modular do notebook [`eda_v2.ipynb`](./eda_v2.ipynb
 Implementação de auditoria transacional comparando a soma dos itens de cada pedido ($\sum \text{quantidade} \times \text{preço\_unitário}$) com o subtotal do cabeçalho (`pedido_subtotal`), via `np.isclose(..., atol=0.01)`.
 - **Resultado:** 2.318 pedidos válidos (94,34%) vs. 139 pedidos divergentes (5,66%).
 - **Exibição dos Dados Divergentes:** Apresentação da tabela de pedidos divergentes com deltas, tabela transacional com os 185 itens afetados e ranking de SKUs mais frequentes (*Rapadura Assada Pacote x6*, *Alfajor Preto Pacote x4* e *Rapadura Melado Pacote x3*), comprovando que o alto desvio decorre do apontamento do valor da embalagem fechada no preço unitário.
+
+*Implementação do Mecanismo de Proporção com Fallback Condicional:*
+Construção do motor de contingência não-destrutivo para sanar as inconsistências de embalagem:
+- Criação das colunas adicionais `fator_k`, `quantidade_ajustada`, `preco_unitario_ajustado` e `valor_item_ajustado`.
+- Dupla conferência contra o `pedido_subtotal` com tolerância de R$ 0,01.
+- Classificação e consolidação: `ORIGINAL_VALIDO` (2.318 pedidos / 94,34% mantendo dados brutos de origem), `AJUSTADO_PROPORCAO` (139 pedidos / 5,66% sanados pela proporção) e `QUARENTENA_RESIDUAL` (0 casos).
+- Taxa de conformidade consolidada atingiu 100,00% com maior delta igual a 0.000000. As grandezas `quantidade_final` e `preco_unitario_final` agora alimentam o K-Means com total coerência métrica.
+
+**2026-09-21**
+
+*Refatoração Modular da Seção 4.6 (Mecanismo de Validação e Contingência):*
+A Seção 4.6 do notebook [`eda_v2.ipynb`](./eda_v2.ipynb) foi refatorada e desacoplada em 5 subetapas conceituais bem definidas, eliminando a densidade do bloco único anterior e estabelecendo uma convenção clara de escopos de dados:
+1. **4.6.1 Extração do Fator de Embalagem ($k$) e Hipótese Proporcional:** Trabalho isolado no DataFrame temporário `df_ajustes_temp` (preservando o `df` principal inalterado).
+2. **4.6.2 Auditoria de Dupla Checagem (Double-Check):** Agregação no nível de pedido em `df_auditoria_fallback_audit` com prova real matemática e classificação determinística dos status de validação (`ORIGINAL_VALIDO`, `AJUSTADO_PROPORCAO`, `QUARENTENA_RESIDUAL`).
+3. **4.6.3 Consolidação no Dataset Principal:** Integração das grandezas auditadas e metadados de linhagem diretamente no DataFrame corporativo oficial (`df`).
+4. **4.6.4 Isolamento da Quarentena Residual:** Governança preventiva isolando transações anômalas em `df_quarentena_audit` (0 registros / 100% de conformidade contábil).
+5. **4.6.5 Demonstração de Prova Real (Antes vs. Depois):** Comparação tabular transparente de pedido ajustado demonstrando delta contábil zero.
