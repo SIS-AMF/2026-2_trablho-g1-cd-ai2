@@ -48,6 +48,7 @@ A organização do projeto segue as melhores práticas de engenharia de dados e 
 │       ├── codigos/7 - clustering/ # Implementações de referência (K-Means, DBSCAN, PCA, Perfil)
 │       └── Trabalho 1 - Inteligência Artificial II.pdf
 ├── reports/                        # Entregáveis técnicos e relatórios finais da disciplina
+│   ├── figures/                    # Gráficos e diagnósticos exportados em alta resolução
 │   ├── .gitkeep
 │   └── relatorio_final.pdf         # Relatório técnico obrigatório da entrega acadêmica
 ├── studing/                        # Datasets brutos e estudos preliminares
@@ -56,10 +57,12 @@ A organização do projeto segue as melhores práticas de engenharia de dados e 
 │   └── BNPL_Financial_Default_Risk_Dataset.csv
 ├── AGENTS.md                       # Harness operacional de agentes, guardrails e especificações de IA
 ├── base.csv                        # Dataset processado e enriquecido após EDA e Feature Engineering
+├── cli.py                          # Interface simples de linha de comando para testar o checkout
 ├── diario_de_bordo.md              # Diário de bordo cronológico das etapas e decisões do projeto
 ├── eda.ipynb                       # Notebook 1: Análise Exploratória de Dados inicial e auditoria
-├── eda_v2.ipynb                    # Notebook 2: Normalização de tipos, agrupamento semântico e ML
+├── eda_v2.ipynb                    # Notebook 2: Normalização de tipos, agrupamento semântico, ML e exportação
 ├── get_dataset.sql                 # Query SQL de extração do banco relacional PostgreSQL de produção
+├── modelo_checkout.joblib          # Modelo K-Means e encoders exportados pelo eda_v2.ipynb
 ├── README.md                       # Documentação central do repositório
 └── requirements.txt                # Dependências exatas congeladas do ambiente virtual
 ```
@@ -166,6 +169,10 @@ Demonstrado na Seção 8.6 de [`eda_v2.ipynb`](file:///home/lucas/Projects/EDA/e
 - **Ação no PDV:** Disparo do gatilho *"Sugestão PDV: Leve mais 3 Alfajores com desconto progressivo no pacote x4!"*.
 - Artefato Visual de Inferência: [`reports/figures/05_simulacao_checkout_recomendacao.png`](file:///home/lucas/Projects/EDA/reports/figures/05_simulacao_checkout_recomendacao.png).
 
+### 4.5. Exportação do Modelo e CLI Simples no Checkout
+No final do notebook [`eda_v2.ipynb`](file:///home/lucas/Projects/EDA/eda_v2.ipynb) (Seção 8.7), o modelo treinado `kmeans`, o `StandardScaler`, os encoders e os dicionários de regras são exportados para o arquivo consolidado [`modelo_checkout.joblib`](file:///home/lucas/Projects/EDA/modelo_checkout.joblib).
+A inferência em tempo de venda é executada diretamente através do script [`cli.py`](file:///home/lucas/Projects/EDA/cli.py).
+
 ---
 
 ## 5. Como Reproduzir o Ambiente e Execução
@@ -193,11 +200,27 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 4. Ordem de Execução do Pipeline
-Para refazer os experimentos e gerar a base de dados tratada:
-1. **Auditoria Exploratória:** Executar [`eda.ipynb`](file:///home/lucas/Projects/EDA/eda.ipynb) para inspecionar os tipos e distribuições brutas.
-2. **Engenharia de Recursos e Base Limpa:** Executar [`eda_v2.ipynb`](file:///home/lucas/Projects/EDA/eda_v2.ipynb). Isso processará [`studing/KalimentosFeirasVendas.csv`](file:///home/lucas/Projects/EDA/studing/KalimentosFeirasVendas.csv) e exportará [`base.csv`](file:///home/lucas/Projects/EDA/base.csv).
-3. **Treinamento e Recomendador:** Rodar as células de modelagem K-Means e visualização gráfica integradas no notebook.
+### 4. Treinar e Exportar o Modelo
+1. **Auditoria Exploratória:** Executar [`eda.ipynb`](file:///home/lucas/Projects/EDA/eda.ipynb).
+2. **Engenharia de Dados e Treinamento:** Executar [`eda_v2.ipynb`](file:///home/lucas/Projects/EDA/eda_v2.ipynb).
+   - O notebook processará [`studing/KalimentosFeirasVendas.csv`](file:///home/lucas/Projects/EDA/studing/KalimentosFeirasVendas.csv), gerará [`base.csv`](file:///home/lucas/Projects/EDA/base.csv), treinará o K-Means e salvará [`modelo_checkout.joblib`](file:///home/lucas/Projects/EDA/modelo_checkout.joblib) na Seção 8.7.
+
+### 5. Executar o CLI de Recomendação
+Com o modelo exportado, execute simulações diretamente pelo terminal informando os parâmetros obrigatórios da transação (nenhum default é assumido para garantir fidelidade à simulação):
+
+```bash
+# Consultar catálogo completo de produtos e formas de pagamento válidas
+python cli.py --listar
+
+# Simulação 1: Lanche Rápido (Alfajor à tarde)
+python cli.py --produto "Alfajor Preto" --hora 16 --preco 6.0 --quantidade 1 --metodo Dinheiro --itens 1
+
+# Simulação 2: Cuca Matinal (Café da manhã na abertura da feira)
+python cli.py --produto "Cuca Alemã" --hora 10 --preco 22.0 --quantidade 2 --metodo Pix --itens 1
+
+# Simulação 3: Atacado e Grandes Encomendas
+python cli.py --produto "Rapadura Assada" --hora 15 --preco 10.0 --quantidade 80 --metodo Dinheiro --itens 5
+```
 
 ---
 

@@ -110,3 +110,20 @@ A Seção 8 do notebook [`eda_v2.ipynb`](./eda_v2.ipynb) foi completamente refat
   1. $\sum (\text{quantidade\_ajustada} \times \text{preco\_unitario\_ajustado}) == \text{pedido\_subtotal}$ nos 139 pedidos com status `AJUSTADO_PROPORCAO` (100,00% de conformidade, 0 erros);
   2. $\sum (\text{quantidade\_final} \times \text{preco\_unitario\_final}) == \text{pedido\_subtotal}$ na totalidade dos 2.457 pedidos únicos do dataset (100,00% de conformidade, $\Delta \text{ máx} = 0.000000$).
 - Implementação de asserções duras (`assert`) de *fail-fast* e descarte automático de colunas transitórias de checagem, mantendo a integridade absoluta das 16 colunas exportadas em `base.csv`.
+
+*Exportação do Modelo e CLI Simples de Checkout (Seção 8.7):*
+- **Exportação Direta no Notebook (`modelo_checkout.joblib`):**
+  - Inclusão da Seção 8.7 em [`eda_v2.ipynb`](./eda_v2.ipynb) salvando de forma concisa e direta o dicionário com o modelo `kmeans` ($K=5$), o escalonador `scaler` (`StandardScaler`), os dicionários de classes dos `LabelEncoder`s, a lista de features, os rótulos de negócio (`cluster_labels`), as regras de cross-selling (`regras_recomendacao`) e o dicionário semântico (`mapa_produtos`).
+  - Arquivo consolidado e leve gerado na raiz do projeto (`modelo_checkout.joblib`).
+- **Interface Simples de Linha de Comando ([`cli.py`](./cli.py)):**
+  - Implementação de um script direto, sequencial e autoexplicativo na raiz do repositório (~80 linhas), sem classes complexas ou microsserviços pesados.
+  - Carrega o arquivo `modelo_checkout.joblib`, aplica a mesma lógica de higienização e codificação segura, e aciona o K-Means para exibir o cluster e a recomendação no terminal.
+  - **Eliminação de Valores Default e Validação Completa de Entradas:**
+    - Removidos todos os valores padrão (`default`) dos argumentos do CLI.
+    - Exigência estrita de fornecimento explícito dos 6 parâmetros transacionais: `--produto`, `--hora` (0 a 23), `--preco` (> 0), `--quantidade` (> 0), `--metodo` (`Dinheiro`, `Cartão`, `Pix`) e `--itens` (cesta $\ge 1$).
+    - Caso qualquer parâmetro seja omitido, a execução é interrompida listando os campos ausentes e exibindo um exemplo formatado de comando válido.
+  - Testado e validado com sucesso:
+    - Alfajor às 16h $\rightarrow$ `[3] C3: Lanche Rápido (Alfajor)` com sugestão do pacote x4;
+    - Cuca Alemã às 10h $\rightarrow$ `[0] C0: Cuca Matinal (Abertura)` com sugestão para café da manhã;
+    - Bloqueio com erro e sugestão em caso de typos (ex.: `alfajo` $\rightarrow$ sugestão de `ALFAJOR`);
+    - Bloqueio com erro informativo ao omitir parâmetros (ex.: `python cli.py`).
