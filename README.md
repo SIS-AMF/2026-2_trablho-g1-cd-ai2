@@ -60,8 +60,7 @@ A organização do projeto segue as melhores práticas de engenharia de dados e 
 ├── cli.py                          # Interface simples de linha de comando para testar o checkout
 ├── demo.sh                         # Script executável de demonstração prática e apresentação
 ├── diario_de_bordo.md              # Diário de bordo cronológico das etapas e decisões do projeto
-├── eda.ipynb                       # Notebook 1: Análise Exploratória de Dados inicial e auditoria
-├── eda_v2.ipynb                    # Notebook 2: Normalização de tipos, agrupamento semântico, ML e exportação
+├── eda_v2.ipynb                    # Notebook completo: Normalização de tipos, agrupamento semântico, ML e exportação
 ├── get_dataset.sql                 # Query SQL de extração do banco relacional PostgreSQL de produção
 ├── modelo_checkout.joblib          # Modelo K-Means e encoders exportados pelo eda_v2.ipynb
 ├── README.md                       # Documentação central do repositório
@@ -202,8 +201,7 @@ pip install -r requirements.txt
 ```
 
 ### 4. Treinar e Exportar o Modelo
-1. **Auditoria Exploratória:** Executar [`eda.ipynb`](file:///home/lucas/Projects/EDA/eda.ipynb).
-2. **Engenharia de Dados e Treinamento:** Executar [`eda_v2.ipynb`](file:///home/lucas/Projects/EDA/eda_v2.ipynb).
+1. **Execução do Pipeline Completo:** Executar [`eda_v2.ipynb`](file:///home/lucas/Projects/EDA/eda_v2.ipynb).
    - O notebook processará [`studing/KalimentosFeirasVendas.csv`](file:///home/lucas/Projects/EDA/studing/KalimentosFeirasVendas.csv), gerará [`base.csv`](file:///home/lucas/Projects/EDA/base.csv), treinará o K-Means e salvará [`modelo_checkout.joblib`](file:///home/lucas/Projects/EDA/modelo_checkout.joblib) na Seção 8.7.
 
 ### 5. Executar o CLI de Recomendação

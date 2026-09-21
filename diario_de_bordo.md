@@ -144,3 +144,13 @@ A Seção 8 do notebook [`eda_v2.ipynb`](./eda_v2.ipynb) foi completamente refat
   - **Análise Tridimensional Eixo por Eixo (8.5.2):** Mapeamento do hipercubo sob 3 coordenadas independentes ($X$ = Volume da Cesta; $Y$ = Momento Temporal; $Z$ = Sensibilidade de Preço Unitário do SKU).
   - **Auditoria Empírica de Casos Extremos no Eixo Z (8.5.3):** Prova cabal no balcão de que o topo de $Z$ isola Cucas Nobres (R$ 25,00) e a base agrupa Doces Populares de desembolso unitário baixo (Alfajores e Rapaduras a R$ 5,00 a R$ 6,00).
   - Dispersão tridimensional com centróides e rótulos semânticos nos eixos (`Axes3D` em 8.5.4).
+
+*Higienização do Repositório e Governança de Arquivos Legados:*
+- **Remoção de Arquivos Legados e Backups:**
+  - Removido `eda_v2.ipynb.bak` (cópia de segurança transitória);
+  - Removido `eda.ipynb` (rascunho exploratório inicial de 13 células, totalmente consolidado e superado pela esteira oficial de 59 células em `eda_v2.ipynb`).
+- **Criação do `.gitignore` Estruturado:**
+  - Configuração abrangente de regras para impedir versionamento acidental de artefatos efêmeros (`.venv/`, caches do Python `__pycache__`, checkpoints do Jupyter `.ipynb_checkpoints/`, arquivos de swap `*.swp`, backups `*.bak`, `*.tmp`).
+- **Preservação de Guardrails e Materiais do Harness:**
+  - Mantidos integralmente os datasets de referência em `studing/` e o acervo didático/pedagógico em `content/` (`CD/`, `IA-1/`, `IA-2/`) que embasam o harness acadêmico e as especificações da disciplina.
+  - Atualizadas as referências estruturais no [`README.md`](./README.md).
