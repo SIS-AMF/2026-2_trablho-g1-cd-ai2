@@ -93,7 +93,7 @@ Os dados brutos foram extraídos do banco de dados operacional de vendas da empr
    - Em conformidade com o princípio da **não-destrutividade**, os dados brutos originais foram preservados em colunas próprias e os valores proporcionais derivados em novas colunas (`quantidade_ajustada`, `preco_unitario_ajustado`, `valor_item_ajustado`, `tipo_escala`).
    - **Identificação Estatística de Escala:** Em vez de constantes ou números mágicos arbitrários, o modelo compara a proximidade do preço à mediana do SKU ($|\frac{P}{k} - \tilde{P}_{\text{SKU}}| < |P - \tilde{P}_{\text{SKU}}|$), preservando flutuações unitárias legítimas (R$ 5 a R$ 7) e identificando preços de embalagem fechada.
    - **Orquestração de Fallback e Harmonização:** Se o cálculo tradicional bate com o subtotal contábil ($\Delta \le 0,01$), os dados originais são mantidos (`status_validacao = 'ORIGINAL_VALIDO'`: 2.318 pedidos). Se o tradicional divergir mas a proporção do fator $k$ fechar o subtotal, o valor proporcional é adotado (`status_validacao = 'AJUSTADO_PROPORCAO'`: 139 pedidos). Para vendas de pacotes fechados em unidades unitárias, a harmonização converte para unidades físicas de consumo sem alterar o subtotal.
-   - **Resultado Consolidado:** **100,00% de conformidade contábil (2.457 de 2.457 pedidos)** com **0 regressões**, **0 pedidos em quarentena residual** e **desvio padrão de preços de produtos com multiplicador estabilizado em 0.0000**.
+   - **Resultado Consolidado e Auditoria Global Pré-Seção 5 (Subseção 4.6.6):** Prova real conclusiva sobre 100% dos 2.457 pedidos e 3.113 itens, confirmando que $\sum (\text{quantidade\_ajustada} \times \text{preco\_unitario\_ajustado}) == \text{pedido\_subtotal}$ nos 139 pedidos com ajuste e $\sum (\text{quantidade\_final} \times \text{preco\_unitario\_final}) == \text{pedido\_subtotal}$ em todo o dataset (**100,00% de conformidade contábil**, 0 regressões, 0 pedidos em quarentena residual e maior delta absoluto de R$ 0,000000).
 
 
 ### 3.3. Engenharia de Atributos (Feature Engineering)
@@ -130,37 +130,41 @@ No PDV original, variações de apresentação do mesmo produto apareciam como s
 
 ## 4. Modelagem de Machine Learning e Recomendador
 
-### 4.1. Algoritmo de Clusterização (K-Means)
-Optou-se pelo **K-Means Clustering** como técnica não supervisionada primordial, seguindo as diretrizes pedagógicas da disciplina ([`content/IA-2/codigos/7 - clustering/1_kmeans.py`](file:///home/lucas/Projects/EDA/content/IA-2/codigos/7%20-%20clustering/1_kmeans.py)):
+### 4.1. Algoritmo de Clusterização (K-Means) e Otimização de Hiperparâmetros ($K$)
+Optou-se pelo **K-Means Clustering** como técnica primordial não supervisionada, alinhando-se aos materiais pedagógicos da disciplina ([`content/IA-2/codigos/7 - clustering/1_kmeans.py`](file:///home/lucas/Projects/EDA/content/IA-2/codigos/7%20-%20clustering/1_kmeans.py)):
 
-- **Padronização:** As variáveis contínuas e numéricas são escalonadas com `StandardScaler` (média zero e variância unitária) para impedir que valores monetários de pedidos dominem atributos temporais ou de contagem.
-- **Escolha de $K$ (Número de Clusters):** Avaliado por meio da curva de inércia (Método do Cotovelo / *Elbow Method*) e coeficiente de silhueta (*Silhouette Score*), estabelecendo $K = 5$ clusters com convergência estável.
-- **Redução de Dimensionalidade (PCA):** Aplicação de `PCA(n_components=2)` para projeção em 2 dimensões, viabilizando o diagnóstico visual e a verificação da separabilidade dos agrupamentos.
+- **Padronização:** As 8 variáveis de decisão (`dia_horario`, `prod_code`, `metodo_code`, `turno_code`, `preco_unitario_final`, `quantidade_final`, `valor_final_pedido`, `qnt_repeticoes_num`) são escalonadas com `StandardScaler` (média zero e desvio unitário) para evitar viés de magnitude monetária sobre grandezas temporais.
+- **Definição Matemática de $K$:** Varredura sistemática de $K \in [2, 8]$ confrontando a Inércia (WCSS / Método do Cotovelo), Coeficiente de Silhueta, Calinski-Harabasz e Davies-Bouldin:
+  - O **Score Calinski-Harabasz atinge seu ápice absoluto em $K=5$ (788.31)**, superando $K=4$ (732.19) e $K=6$ (759.68).
+  - A curva de inércia apresenta estabilização e ponto de cotovelo entre 4 e 5 clusters.
+  - Artefato gerado: [`reports/figures/01_otimizacao_k_cotovelo_silhueta.png`](file:///home/lucas/Projects/EDA/reports/figures/01_otimizacao_k_cotovelo_silhueta.png).
 
-### 4.2. Caracterização dos Clusters Latentes
+### 4.2. Caracterização Semântica e Perfil Operacional dos 5 Clusters
+A análise dos centróides padronizados (Z-Score) e médias empíricas revelou 5 segmentos nítidos no PDV:
 
-```text
-[Cluster 0] - "Cesta Familiar Tradicional": Pedidos do turno da tarde com forte presença de Cucas Alemãs e Cucas Enroladas.
-[Cluster 1] - "Lanche Rápido & Snack Individual": Transações de valor moderado com Alfajores avulsos e Amendoim Temperado.
-[Cluster 2] - "Atacado / Presentes Coloniais": Grandes volumes compostos por caixas fechadas de rapaduras e bandejas de alfajor.
-[Cluster 3] - "Compra Noturna de Impulso": Horários próximos ao encerramento, ticket médio menor, alta frequência de Pix/Cartão.
-[Cluster 4] - "Mix Colonial Completo": Carrinhos com alta 'qnt_repeticoes' contendo doces secos (bolachas) associados a cucas.
-```
+| Cluster | Nome Operacional | % Base | Horário Médio | Qtd Média | Preço Unit. | Ticket Médio | SKU Predominante |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **C0** | **Cuca Matinal (Abertura)** | 15,8% | 10,0h (Manhã) | 2,69 un | R$ 11,78 | R$ 29,38 | `CUCA_ALEMÃ` |
+| **C1** | **Doces Tradicionais (Tarde)** | 33,4% | 15,7h (Tarde) | 2,78 un | R$ 7,07 | R$ 34,67 | `RAPADURA_MELADO` |
+| **C2** | **Padaria Familiar (Cuca Inteira)**| 30,2% | 15,6h (Tarde) | 1,34 un | R$ 22,13 | R$ 32,60 | `CUCA_ALEMÃ` |
+| **C3** | **Lanche Rápido (Alfajor)** | 20,1% | 15,7h (Tarde) | 2,83 un | R$ 6,44 | R$ 44,92 | `ALFAJOR` |
+| **C4** | **Atacado / Grandes Encomendas** | 0,4% | 14,8h (Tarde) | 86,62 un | R$ 10,42 | R$ 2.839,38 | `RAPADURA_ASSADA` |
 
-### 4.3. Motor de Recomendação no Checkout (Cross-Selling)
-Uma vez instanciado o modelo, a inferência em tempo de execução opera sob a seguinte lógica:
+- Artefato de Interpretação: [`reports/figures/04_heatmap_centroides_clusters.png`](file:///home/lucas/Projects/EDA/reports/figures/04_heatmap_centroides_clusters.png).
 
-```python
-def recomendar_item_checkout(cluster_id, itens_no_pedido):
-    catalogo_recomendacao = {
-        0: "☕ Recomendação: Adicionar Café Colonial ou Alfajor Tradicional para sobremesa.",
-        1: "🥜 Recomendação: Leve um pacote de Amendoim Crocante ou Cri-Cri com desconto!",
-        2: "🎁 Recomendação: Complete o kit com uma Cuca Alemã fresquinha com preço de combo.",
-        3: "🍬 Recomendação: Que tal levar uma Rapadura de Melado artesanal para a viagem?",
-        4: "🍪 Recomendação: Pacote de Bolachas Coloniais de Manteiga para o café da manhã."
-    }
-    return catalogo_recomendacao.get(cluster_id, "💡 Sugestão: Cuca Alemã Tradicional")
-```
+### 4.3. Suite Visual Multidimensional com PCA (2D Biplot e 3D)
+Para superar as limitações de dispersões bidimensionais arbitrárias com eixos categóricos:
+1. **PCA 2D com Biplot de Cargas:** Projeção linear retendo **40,5% da variância**. $\text{PC}_1$ (23,2%) condensa a dimensão de volume/valor da cesta e $\text{PC}_2$ (17,3%) condensa a dimensão temporal. As setas vetoriais (*loadings*) tornam a leitura dos eixos imediata.
+   - Artefato: [`reports/figures/02_pca_2d_clusters_biplot.png`](file:///home/lucas/Projects/EDA/reports/figures/02_pca_2d_clusters_biplot.png).
+2. **PCA 3D (`Axes3D`):** Eleva a variância retida para **54,2%**, isolando no eixo vertical ($\text{PC}_3$ — 13,7%) a diferenciação por preço unitário do item (produtos populares vs. padaria colonial artesanal).
+   - Artefato: [`reports/figures/03_pca_3d_clusters.png`](file:///home/lucas/Projects/EDA/reports/figures/03_pca_3d_clusters.png).
+
+### 4.4. Motor de Recomendação no Checkout (Cross-Selling em Tempo Real)
+Demonstrado na Seção 8.6 de [`eda_v2.ipynb`](file:///home/lucas/Projects/EDA/eda_v2.ipynb), o motor realiza a inferência determinística para qualquer carrinho em tempo de fechamento:
+- **Exemplo Real:** Novo cliente comprando 1 Alfajor avulso (R$ 6,00) às 16:00.
+- **Classificação:** Mapeado instantaneamente no cluster **C3 (Lanche Rápido / Alfajor)**.
+- **Ação no PDV:** Disparo do gatilho *"Sugestão PDV: Leve mais 3 Alfajores com desconto progressivo no pacote x4!"*.
+- Artefato Visual de Inferência: [`reports/figures/05_simulacao_checkout_recomendacao.png`](file:///home/lucas/Projects/EDA/reports/figures/05_simulacao_checkout_recomendacao.png).
 
 ---
 
@@ -202,8 +206,5 @@ Para refazer os experimentos e gerar a base de dados tratada:
 - **Instituição:** Faculdade Antonio Meneghetti (AMF)
 - **Curso:** Bacharelado em Sistemas de Informação
 - **Disciplina:** Inteligência Artificial II (2026/02)
-- **Docente Responsável:** Prof. Rhauani Fazul ([`@rwfazul`](https://github.com/rwfazul))
-- **Autor / Discente:** Lucas G. Feldmann ([`@lucasgfeldmann`](https://github.com/lucasgfeldmann) — `lucasgfeldmann@gmail.com`)
-- **Data Limite de Entrega:** 21 de setembro de 2026, às 12h00m
 - **Relatório Técnico Obrigatório:** [`reports/relatorio_final.pdf`](file:///home/lucas/Projects/EDA/reports/relatorio_final.pdf)
 - **Diretrizes de Agentes e Harness:** [`AGENTS.md`](file:///home/lucas/Projects/EDA/AGENTS.md)

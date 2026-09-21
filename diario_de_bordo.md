@@ -55,6 +55,7 @@ A Seção 4.6 do notebook [`eda_v2.ipynb`](./eda_v2.ipynb) foi refatorada e desa
 3. **4.6.3 Consolidação no Dataset Principal:** Integração das grandezas auditadas e metadados de linhagem diretamente no DataFrame corporativo oficial (`df`).
 4. **4.6.4 Isolamento da Quarentena Residual:** Governança preventiva isolando transações anômalas em `df_quarentena_audit` (0 registros / 100% de conformidade contábil).
 5. **4.6.5 Demonstração de Prova Real (Antes vs. Depois):** Comparação tabular transparente de pedido ajustado demonstrando delta contábil zero.
+6. **4.6.6 Auditoria Global de Integridade Contábil (Validação Pré-Seção 5):** Prova real exaustiva sobre 100% dos 2.457 pedidos e 3.113 itens, comprovando matematicamente que $\sum (Q_{\text{ajustada}} \times P_{\text{ajustado}}) \equiv \text{pedido\_subtotal}$ nos 139 pedidos corrigidos e $\sum (Q_{\text{final}} \times P_{\text{final}}) \equiv \text{pedido\_subtotal}$ no universo total (100,00% de conformidade, $\Delta \text{ máx} = 0.000000$, assertividade fail-fast e eliminação de colunas transitórias).
 
 *Aprimoramento do Cálculo Proporcional (Eliminação de Magic Numbers):*
 - Substituição da constante empírica `preco >= 10.0` por um modelo estatístico robusto baseado na proximidade à escala central típica do SKU: $|\frac{P}{k} - \tilde{P}_{\text{SKU}}| < |P - \tilde{P}_{\text{SKU}}|$.
@@ -74,3 +75,38 @@ A Seção 4.6 do notebook [`eda_v2.ipynb`](./eda_v2.ipynb) foi refatorada e desa
 - **Prova Real de Não-Impacto:** Como $Q = 0 \implies Q \times P = \text{R\$\,}0,00$, a remoção não afeta o balanço financeiro dos pedidos, que continuam fechando exatamente os R$ 20,00 de subtotal.
 - **Preservação Amostral:** Nenhum pedido foi descartado (2.457 pedidos únicos mantidos 100%).
 - **Efeito Sanitizador:** Ajuste correto da diversidade da cesta (`qnt_repeticoes` passou de 2 para 1 em ambos os pedidos) e `base.csv` exportado com 3.113 linhas estritamente íntegras.
+
+*Implementação da Seção 8: Agrupamento Não Supervisionado, Diagnóstico Multidimensional e Recomendação (K-Means & PCA):*
+A Seção 8 do notebook [`eda_v2.ipynb`](./eda_v2.ipynb) foi completamente refatorada e expandida em 6 subetapas modulares, alinhadas às diretrizes do Prof. Rhauani Fazul e do [Harness de Agentes](./AGENTS.md):
+1. **8.1 Preparação, Codificação e Padronização:** Isolamento de instâncias independentes de `LabelEncoder` (`le_metodo`, `le_prod`, `le_turno`) e padronização contínua rigorosa via `StandardScaler` sobre 8 features (`dia_horario`, `prod_code`, `metodo_code`, `turno_code`, `preco_unitario_final`, `quantidade_final`, `valor_final_pedido`, `qnt_repeticoes_num`).
+2. **8.2 Otimização Experimental do Hiperparâmetro $K$:**
+   - Varredura de $K \in [2, 8]$ calculando simultaneamente Inércia (WCSS / Método do Cotovelo), Coeficiente de Silhueta, Calinski-Harabasz e Davies-Bouldin.
+   - **Convergência Matemática:** O índice Calinski-Harabasz atingiu seu ápice absoluto exatamente em $K=5$ (score de 788.31, superando os 732.19 de $K=4$ e 759.68 de $K=6$), coincidindo com o ponto de inflexão e estabilização da inércia.
+   - Exportação do painel comparativo em alta resolução: [`reports/figures/01_otimizacao_k_cotovelo_silhueta.png`](./reports/figures/01_otimizacao_k_cotovelo_silhueta.png).
+3. **8.3 Ajuste do Modelo Definitivo ($K=5$) e Semântica de Negócio:**
+   - Treinamento determinístico `KMeans(n_clusters=5, random_state=42, n_init=10)`.
+   - Identificação e batismo dos 5 perfis de clientes do PDV:
+     - *C0 (15,8%):* Cuca Matinal (Abertura / Café da manhã da feira às 10h);
+     - *C1 (33,4%):* Doces Tradicionais Vespertinos (Rapaduras de Melado a R$ 7,00);
+     - *C2 (30,2%):* Padaria Familiar (Cucas Alemãs inteiras de R$ 22,00 para viagem);
+     - *C3 (20,1%):* Lanches Rápidos (Alfajores individuais da tarde);
+     - *C4 (0,4%):* Atacado e Grandes Encomendas corporativas (Ticket médio > R$ 2.800,00).
+   - Exportação do heatmap de centróides (Z-score): [`reports/figures/04_heatmap_centroides_clusters.png`](./reports/figures/04_heatmap_centroides_clusters.png).
+4. **8.4 Visualização Multidimensional 2D com PCA e Biplot de Cargas:**
+   - Projeção ortogonal retendo 40,5% da variância ($\text{PC}_1$: 23,2% para volume da cesta; $\text{PC}_2$: 17,3% para momento temporal).
+   - Centróides projetados com destaque e inclusão dos vetores de carga (*loadings*) do Biplot, revelando a direção das forças de cada feature no plano.
+   - Exportação: [`reports/figures/02_pca_2d_clusters_biplot.png`](./reports/figures/02_pca_2d_clusters_biplot.png).
+5. **8.5 Projeção Tridimensional PCA ($\text{PC}_1 \times \text{PC}_2 \times \text{PC}_3$ via Axes3D):**
+   - Incorporação da 3ª componente elevando a variância explicada acumulada para 54,2%, isolando o eixo de Preço Unitário Final.
+   - Exportação: [`reports/figures/03_pca_3d_clusters.png`](./reports/figures/03_pca_3d_clusters.png).
+6. **8.6 Motor de Inferência e Simulação de Recomendação no Checkout:**
+   - Pipeline de simulação em tempo real para um novo cliente no PDV (compra de 1 alfajor às 16h).
+   - Classificação em $C_3$, projeção estelar no mapa PCA e acionamento determinístico de cross-selling ("Leve mais 3 alfajores com desconto progressivo no pacote x4!").
+   - Exportação: [`reports/figures/05_simulacao_checkout_recomendacao.png`](./reports/figures/05_simulacao_checkout_recomendacao.png).
+
+*Auditoria Global de Integridade Contábil Consolidada (Pré-Seção 5):*
+- Inclusão formal da subseção **4.6.6** em [`eda_v2.ipynb`](./eda_v2.ipynb), posicionada estrategicamente como portão de qualidade (*quality gate*) imediatamente antes do agrupamento semântico da Seção 5.
+- **Validação Dupla:**
+  1. $\sum (\text{quantidade\_ajustada} \times \text{preco\_unitario\_ajustado}) == \text{pedido\_subtotal}$ nos 139 pedidos com status `AJUSTADO_PROPORCAO` (100,00% de conformidade, 0 erros);
+  2. $\sum (\text{quantidade\_final} \times \text{preco\_unitario\_final}) == \text{pedido\_subtotal}$ na totalidade dos 2.457 pedidos únicos do dataset (100,00% de conformidade, $\Delta \text{ máx} = 0.000000$).
+- Implementação de asserções duras (`assert`) de *fail-fast* e descarte automático de colunas transitórias de checagem, mantendo a integridade absoluta das 16 colunas exportadas em `base.csv`.
