@@ -79,21 +79,26 @@ Os dados brutos foram extraídos do banco de dados operacional de vendas da empr
 1. **Auditoria de Integridade Financeira:** Foi verificado que $100\%$ dos registros satisfazem a relação:
    $$\text{pedido\_subtotal} - \text{pedido\_valor\_desconto} = \text{valor\_final\_pedido}$$
    Isso permitiu descartar com segurança a coluna redundante `pedido_tipo_desconto`.
-2. **Eliminação de Colunas Irrelevantes:** Foram descartadas as datas de vigência do evento (`evento_data_inicio`, `evento_data_fim`) e a coluna `item_pedido_user_id` (duplicada em relação a `pedido_vendedor`).
+2. **Eliminação de Colunas Irrelevantes e Inconsistentes:**
+   - Descarte das datas de vigência do evento (`evento_data_inicio`, `evento_data_fim`).
+   - Descarte de `item_pedido_user_id` e `pedido_vendedor`: nas feiras, múltiplos atendentes operam o mesmo terminal de caixa sob a mesma credencial de login. Esse dado não reflete a autoria fidedigna do atendimento, além de ser irrelevante para o agrupamento de cestas de consumo.
 3. **Tratamento de Datas e Fusos:** Conversão de strings timestamp mistas para `datetime64[ns, America/Sao_Paulo]` com inferência robusta.
 
 ### 3.3. Engenharia de Atributos (Feature Engineering)
-As transformações desenvolvidas em [`eda_v2.ipynb`](file:///home/lucas/Projects/EDA/eda_v2.ipynb) resultaram no dataset consolidado [`base.csv`](file:///home/lucas/Projects/EDA/base.csv):
+As transformações desenvolvidas em [`eda_v2.ipynb`](file:///home/lucas/Projects/EDA/eda_v2.ipynb) resultaram no dataset consolidado [`base.csv`](file:///home/lucas/Projects/EDA/base.csv) (16 colunas tratadas):
 
 | Atributo Criado / Tratado | Tipo | Descrição e Racional Técnico |
 | :--- | :--- | :--- |
+| `nome_produto_bruto` | Texto | Nome original preservado intacto para fins de auditoria de escala e embalagens. |
+| `nome_produto` | Categórico | Nome higienizado com substituição de caracteres especiais e maiúsculas. |
+| `quantidade_item` | Inteiro | Volume numérico de unidades do item na linha do pedido. |
+| `preco_unitario_item` | Float | Preço unitário faturado no momento da venda. |
 | `qnt_repeticoes` | Categórico / Inteiro | Contagem de linhas por `pedido_id`. Identifica a diversidade de itens no mesmo carrinho (compras simples vs. compras combinadas). |
 | `mes` | Inteiro (1–12) | Mês do evento, permitindo capturar sazonalidades ao longo do ano. |
 | `dia_semana` | Inteiro (0–6) | Dia da semana (0=Segunda-feira a 6=Domingo), diferenciando o fluxo de dias úteis e finais de semana da feira. |
 | `dia_horario` | Inteiro (0–23) | Hora inteira da transação (picos de almoço, meio de tarde e fechamento de feira). |
 | `turno` | Categórico | Binning temporal via `pd.cut`: *Madrugada* (0h–5h), *Manhã* (6h–11h), *Tarde* (12h–17h) e *Noite* (18h–23h). |
-| `vendedor` | Binário | Codificação dos operadores de caixa via `LabelBinarizer`. |
-| `payment_mathod` | Categórico | Forma de pagamento utilizada (*Dinheiro*: 58,4%, *Cartão*: 31,6%, *Pix*: 10,0%). |
+| `metodo_pagamento` | Categórico | Forma de pagamento utilizada (*Dinheiro*: 58,4%, *Cartão*: 31,6%, *Pix*: 10,0%). |
 
 ### 3.4. Normalização Textual e Agrupamento Semântico de Produtos
 No PDV original, variações de apresentação do mesmo produto apareciam como strings distintas (ex.: displays, caixas com 16 unidades, pacotes com 4 unidades ou potes). Para viabilizar a clusterização sem dispersão excessiva de dimensionalidade:
