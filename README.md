@@ -58,6 +58,7 @@ A organização do projeto segue as melhores práticas de engenharia de dados e 
 ├── AGENTS.md                       # Harness operacional de agentes, guardrails e especificações de IA
 ├── base.csv                        # Dataset processado e enriquecido após EDA e Feature Engineering
 ├── cli.py                          # Interface simples de linha de comando para testar o checkout
+├── demo.sh                         # Script executável de demonstração prática e apresentação
 ├── diario_de_bordo.md              # Diário de bordo cronológico das etapas e decisões do projeto
 ├── eda.ipynb                       # Notebook 1: Análise Exploratória de Dados inicial e auditoria
 ├── eda_v2.ipynb                    # Notebook 2: Normalização de tipos, agrupamento semântico, ML e exportação
@@ -222,9 +223,17 @@ python cli.py --produto "Cuca Alemã" --hora 10 --preco 22.0 --quantidade 2 --me
 python cli.py --produto "Rapadura Assada" --hora 15 --preco 10.0 --quantidade 80 --metodo Dinheiro --itens 5
 ```
 
+### 6. Roteiro de Apresentação Prática (`demo.sh`)
+O arquivo [`demo.sh`](file:///home/lucas/Projects/EDA/demo.sh) contém a lista comentada dos comandos prontos para serem executados ou copiados e colados um a um no terminal durante a apresentação:
+- Consulta do catálogo (`--listar`);
+- Demonstração dos 5 perfis de clientes/clusters ($C_0$ a $C_4$);
+- Demonstração dos guardrails (sem defaults, typo inteligente e pagamento inválido).
+
+Você pode abrir o arquivo [`demo.sh`](file:///home/lucas/Projects/EDA/demo.sh) e executar cada comando individualmente conforme sua fala na apresentação.
+
 ---
 
-## 6. Entregáveis Acadêmicos e Metadados do Projeto
+## 7. Entregáveis Acadêmicos e Metadados do Projeto
 
 - **Instituição:** Faculdade Antonio Meneghetti (AMF)
 - **Curso:** Bacharelado em Sistemas de Informação

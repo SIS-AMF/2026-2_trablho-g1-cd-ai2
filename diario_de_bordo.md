@@ -127,3 +127,7 @@ A Seção 8 do notebook [`eda_v2.ipynb`](./eda_v2.ipynb) foi completamente refat
     - Cuca Alemã às 10h $\rightarrow$ `[0] C0: Cuca Matinal (Abertura)` com sugestão para café da manhã;
     - Bloqueio com erro e sugestão em caso de typos (ex.: `alfajo` $\rightarrow$ sugestão de `ALFAJOR`);
     - Bloqueio com erro informativo ao omitir parâmetros (ex.: `python cli.py`).
+- **Roteiro Automatizado de Apresentação e Demonstração Prática ([`demo.sh`](./demo.sh)):**
+  - Criação de script Bash executável com formatação ANSI colorida e narrativa de negócio estruturada em 8 cenários.
+  - Cobre exaustivamente a ativação dos 5 clusters identificados ($C_0$ a $C_4$), a consulta de catálogo e a demonstração ao vivo dos guardrails (bloqueio de omissão, detecção de typos via `difflib` e rejeição de formas de pagamento não homologadas).
+  - Suporta modo interativo (com pausas entre casos para explicação oral) e modo contínuo (`./demo.sh --auto`). Validação executada com 100% de sucesso.
