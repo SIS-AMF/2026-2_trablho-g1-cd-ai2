@@ -48,12 +48,11 @@ Nesse acervo histórico encontram-se preservados:
 │   ├── IA-1/                       # Acervo de IA I (ML Clássico, Redes Neurais, NLP, GenAI)
 │   └── IA-2/                       # Acervo de IA II e pasta archive/ com o Trabalho 1
 │       ├── archive/                # Acervo histórico do Trabalho 1 (KAlimentos)
+│       │   ├── datasets/           # Datasets brutos de estudo arquivados
+│       │   └── ...
 │       └── ...
-├── studing/                        # Datasets brutos de estudo e benchmarks
-│   ├── BNPL_Financial_Default_Risk_Dataset.csv
-│   ├── bread_basket.csv
-│   ├── KalimentosFeirasVendas.csv
-│   └── VendasFeiras.csv
+├── dataset-kalimentos-vendas.csv   # Dataset oficial de transações de feiras da KAlimentos (Ciência de Dados)
+├── get_dataset.sql                 # Consulta SQL de extração do banco transacional da KAlimentos
 ├── requirements.txt                # Dependências Python homologadas (pandas, polars, scikit-learn, etc.)
 └── README.md                       # Apresentação institucional e mapa do repositório
 ```

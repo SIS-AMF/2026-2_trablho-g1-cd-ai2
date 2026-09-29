@@ -30,6 +30,7 @@ Abaixo está o mapeamento completo dos artefatos arquivados, seu nome original n
 | [`modelo_checkout_kmeans.joblib`](./modelo_checkout_kmeans.joblib) | `modelo_checkout.joblib` | Artefato de ML | Pipeline de inferência serializado contendo o modelo `KMeans(n_clusters=5)`, os escaladores (`StandardScaler`) e as matrizes de recomendação. |
 | [`base_kalimentos_processada.csv`](./base_kalimentos_processada.csv) | `base.csv` | Dataset | Dataset transacional resultante do pré-processamento e da engenharia de atributos temporais e contextuais (sem nulos). |
 | [`get_dataset_kalimentos.sql`](./get_dataset_kalimentos.sql) | `get_dataset.sql` | Consulta SQL | Consulta SQL original utilizada para extração e consolidação dos dados do banco relacional de feiras da KAlimentos. |
+| [`datasets/`](./datasets/) | `studing/` | Datasets Brutos | Acervo de dados originais de estudo: `KalimentosFeirasVendas.csv`, `bread_basket.csv`, `BNPL_Financial_Default_Risk_Dataset.csv` e `VendasFeiras.csv`. |
 | [`reports/`](./reports/) | `reports/` | Entregáveis | Diretório contendo os entregáveis formais da disciplina (descrito a seguir). |
 
 ---
