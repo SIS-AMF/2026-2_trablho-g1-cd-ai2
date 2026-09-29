@@ -8,17 +8,22 @@ Uso:
     python cli.py --listar
 """
 
+import os
 import argparse
 import difflib
 import sys
 import joblib
 import pandas as pd
 
-# 1. Carregar o modelo exportado pelo notebook eda_v2.ipynb
+# 1. Carregar o modelo exportado
+MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "modelo_checkout_kmeans.joblib")
+if not os.path.exists(MODEL_PATH):
+    MODEL_PATH = "modelo_checkout_kmeans.joblib"
+
 try:
-    bundle = joblib.load("modelo_checkout.joblib")
+    bundle = joblib.load(MODEL_PATH)
 except FileNotFoundError:
-    print("Erro: 'modelo_checkout.joblib' não encontrado. Execute o notebook eda_v2.ipynb primeiro.", file=sys.stderr)
+    print(f"Erro: '{MODEL_PATH}' não encontrado. Verifique os arquivos no diretório archive.", file=sys.stderr)
     sys.exit(1)
 
 kmeans = bundle["kmeans"]
