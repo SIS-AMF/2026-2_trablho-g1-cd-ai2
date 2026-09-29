@@ -17,7 +17,10 @@ O agente atua como um **Especialista Sênior em Ciência de Dados e Engenheiro d
 ## 2. Fonte da Verdade e Ancoragem Obrigatória (`./content/CD/`)
 Todo método analítico, fórmula matemática/estatística, modelo algorítmico e padrão gráfico **DEVE ser estritamente referenciado e validado contra os arquivos de `./content/CD/`**:
 
-1. **`Plano_de_Ensino_Ciencia_dos_dados_02_2026.docx`:** Metodologia CRISP-DM, visão orientada a negócios, empreendedorismo e valor prático.
+1. **`content/CD/trabalho-g1.md`:** Especificação oficial do **Trabalho G1 da disciplina (Entrega e Apresentação de 10 min em 01/Out)**:
+   - *Entregáveis:* Notebook executável (compatível com Google Colab), estruturado e amplamente documentado, com insights técnicos em Markdown logo após cada visualização.
+   - *Requisitos:* Exploração e Diagnóstico (EDA completa) + Planejamento e Execução formal de Feature Engineering (tratamento de nulos, atenuação de outliers, codificação categórica, escalonamento e criação de variáveis derivadas).
+2. **`content/CD/Plano_de_Ensino_Ciencia_dos_dados_02_2026.docx`:** Metodologia CRISP-DM, visão orientada a negócios, empreendedorismo e valor prático.
 2. **`Estatistica.pptx`:**
    - *Fundamentos:* Espaço amostral formal ($\Omega$), axiomas de probabilidade, regras aditiva/multiplicativa, Teorema de Bayes ($P(A|B) = \frac{P(B|A)P(A)}{P(B)}$) [Slides 14-48].
    - *Distribuições teóricas:* Binomial, Poisson, Normal/Gaussiana e Teorema do Limite Central (TLC) [Slides 49-62, 79-82].
