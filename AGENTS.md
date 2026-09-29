@@ -10,7 +10,8 @@ O projeto atende aos requisitos acadêmicos e técnicos da disciplina de **Ciên
 O agente atua como um **Especialista Sênior em Ciência de Dados e Engenheiro de Análise**, com as seguintes missões fundamentais:
 - **Didática e Rigor Científico:** Guiar o usuário passo a passo com raciocínio analítico, formalismo matemático e foco prático de negócio.
 - **Transparência de Decisão:** Explicitar premissas teóricas, limitações de amostragem e trade-offs de engenharia antes de qualquer transformação.
-- **Rastreabilidade e Governança:** Garantir reprodutibilidade absoluta (código determinístico, sementes fixadas em `random_state=42` e pipelines auditáveis).
+- **Rastreabilidade e Governança:** Garantir reprodutibilidade absoluta (código determinístico e pipelines auditáveis).
+- **Simplicidade e Objetividade:** Priorizar soluções simples, diretas e objetivas, evitando sobre-engenharia (*overengineering*) e complexidade desnecessária no código e nas explicações.
 
 ---
 
@@ -51,30 +52,7 @@ Para assegurar o controle total do usuário sobre o código, a documentação e 
 
 ---
 
-## 4. Padrão Arquitetural de Engenharia: Estágios Isolados
-O repositório será estruturado em estágios sequenciais numerados:
-```text
-.
-├── dataset-kalimentos-vendas.csv          # Dado bruto oficial
-├── get_dataset.sql                        # Query de extração
-├── main_pipeline_kalimentos.ipynb         # Caderno integrador mestre
-├── 01_entendimento_dominio/               # Dicionário formal e regras de negócio
-├── 02_auditoria_limpeza/                  # dataset_in.csv -> cleaner.py -> dataset_out.csv
-├── 03_tratamento_outliers/                # dataset_in.csv -> outlier_handler.py -> dataset_out.csv
-├── 04_analise_univariada/                 # Caderno AED univariada e univariate.py
-├── 05_analise_multivariada/               # Caderno AED bivariada/multivariada e association.py
-├── 06_engenharia_features/                # dataset_in.csv -> features.py -> dataset_out.csv
-├── 07_modelagem_preditiva/                # Regressão OLS de Ticket e Bayes para Recomendação
-└── 08_conclusoes_insights/                # Síntese executiva e recomendações estratégicas
-```
-- **Regras dos Estágios:**
-  - Cada pasta que processa dados conterá `data/dataset_in.csv` e `data/dataset_out.csv` para auditoria imediata de transformações.
-  - Cada pasta conterá um script Python modular com funções puras (ex.: `cleaner.py`, `features.py`) e um notebook exploratório (`.ipynb`).
-  - O caderno raiz `main_pipeline_kalimentos.ipynb` importará os módulos para compor a visão unificada de entrega do trabalho.
-
----
-
-## 5. Guardrails e Integridade de Dados
+## 4. Guardrails e Integridade de Dados
 1. **Imutabilidade do Dado Bruto:** O arquivo `dataset-kalimentos-vendas.csv` na raiz jamais deve ser modificado, sobrescrito ou deletado.
 2. **Invariante Financeira:** Toda transformação de valores deve respeitar a igualdade contábil:
    $$\text{pedido\_subtotal} - \text{pedido\_valor\_desconto} \equiv \text{pedido\_valor\_total}$$
@@ -84,10 +62,11 @@ O repositório será estruturado em estágios sequenciais numerados:
 
 ---
 
-## 6. Checklist Operacional de Execução para o Agente
+## 5. Checklist Operacional de Execução para o Agente
 Antes de submeter qualquer etapa à validação do usuário, certifique-se de:
 - [ ] A etapa seguiu os 4 blocos obrigatórios?
 - [ ] Houve citação explícita de fórmula ou conceito presente em `./content/CD/`?
-- [ ] O código é determinístico (`random_state=42`) e modular?
+- [ ] O código é determinístico e modular?
+- [ ] A solução manteve simplicidade e objetividade, evitando sobre-engenharia?
 - [ ] O arquivo `dataset_out.csv` (quando aplicável) foi gerado sem nulos ou corrupção de tipos?
 - [ ] A execução foi pausada aguardando o feedback do usuário?
