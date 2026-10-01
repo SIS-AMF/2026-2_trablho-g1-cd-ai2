@@ -52,9 +52,10 @@ Nesse acervo histórico encontram-se preservados:
 │       │   └── ...
 │       └── ...
 ├── dataset-kalimentos-vendas.csv   # Dataset oficial de transações de feiras da KAlimentos (Ciência de Dados)
+├── dataset_out.csv                 # Dataset pré-processado final (2.457 pedidos x 21 features, 0 nulos)
 ├── get_dataset.sql                 # Consulta SQL de extração do banco transacional da KAlimentos
 ├── GUIA_METODOLOGICO_EDA_FEATURE_ENGINEERING.md # Guia metodológico canônico e auditável de AED e Feature Engineering
-├── main.ipynb                      # Caderno executável oficial (AED completa, auditorias e associações)
+├── main.ipynb                      # Caderno executável oficial (AED completa, auditorias, associações e Feature Engineering)
 ├── requirements.txt                # Dependências Python homologadas (pandas, scikit-learn, dython, etc.)
 └── README.md                       # Apresentação institucional e mapa do repositório
 ```
@@ -63,13 +64,17 @@ Nesse acervo histórico encontram-se preservados:
 
 ## 4. Pipeline Analítico — Trabalho G1 (Ciência dos Dados)
 
-O caderno [`main.ipynb`](./main.ipynb) reúne o pipeline rigoroso de Análise Exploratória de Dados (AED) estruturado em 4 blocos de governança:
+O caderno [`main.ipynb`](./main.ipynb) reúne o pipeline rigoroso de Análise Exploratória de Dados (AED) e Engenharia de Atributos estruturado em 4 blocos de governança:
 
 1. **Inspeção Estrutural Inicial & Casting:** Diagnóstico preliminar e tipagem com preservação estrita do dado bruto (`df_proc = df.copy()`).
 2. **Auditoria de Domínio & Invariante Financeira:** Validação contábil da equação $\text{subtotal} - \text{desconto} \equiv \text{total}$ e descarte fundamentado de credenciais sem variância.
 3. **Sumarização Descritiva & Visualização de Outliers:** Triangulação de medidas de centralidade e dispersão, limites de Tukey ($1{,}5 \times IQR$) e auditoria de dupla contagem relacional.
 4. **Saneamento Cirúrgico & Normalização de Embalagens:** Desdobramento de pacotes via Regex, eliminação de 100% das divergências contábeis e retificação de erro de digitação de catálogo.
 5. **Associações Heterogêneas & Diagnósticos:** Testes de normalidade, correlações de postos (Spearman), Correlation Ratio ($\eta$), V de Cramér ($V$), diagnóstico de multicolinearidade (VIF) e Informação Mútua (MI).
+6. **Planejamento Formal de Feature Engineering:** Matriz técnica de transformações respaldada na EDA (descarte fundamentado de credenciais, atenuação de cauda via `log1p` e mix de famílias).
+7. **Execução do Pipeline & Exportação (`dataset_out.csv`):** Consolidação de 21 atributos interpretáveis no nível de transação ($n = 2.457$), colapso da assimetria do faturamento (+25,42 para +0,70) e exportação com zero nulos e receita íntegra em R$ 75.665,88.
+
+
 
 
 ---
